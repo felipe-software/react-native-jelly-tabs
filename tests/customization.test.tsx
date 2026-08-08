@@ -125,7 +125,7 @@ afterEach(async () => {
     await cleanup();
 });
 
-describe("CUSTOMIZATION.md component contract", () => {
+describe("PROPS.md component contract", () => {
     test("keeps JellyTabs as an alias for JellyTabBarHeadless", () => {
         expect(JellyTabs).toBe(JellyTabBarHeadless);
     });
@@ -366,6 +366,35 @@ describe("CUSTOMIZATION.md component contract", () => {
         ).toBe("inbox-tab");
     });
 
+    test("layers activeBadgeStyle over badgeStyle inside the pill mask only", async () => {
+        const customItem: TabsItem = {
+            activeBadgeStyle: { backgroundColor: "gold", color: "black" },
+            activeIcon: ActiveIcon,
+            badge: "NEW",
+            badgeStyle: { backgroundColor: "purple" },
+            inactiveIcon: InactiveIcon,
+            key: "inbox",
+            label: "Inbox",
+        };
+        const renderer = await render(
+            <JellyTabBarHeadless items={[customItem]} />,
+        );
+        // The track row renders before the row revealed through the mask.
+        const [trackBadge, maskedBadge] = findAllByType(
+            renderer,
+            host.text,
+        ).filter((node) => node.props.children === customItem.badge);
+
+        expect(flattenStyle(trackBadge?.props.style)).toMatchObject({
+            backgroundColor: "purple",
+            color: "#FFFFFF",
+        });
+        expect(flattenStyle(maskedBadge?.props.style)).toMatchObject({
+            backgroundColor: "gold",
+            color: "black",
+        });
+    });
+
     test("renders track and selected backdrops before their color layers", async () => {
         const renderer = await render(
             <JellyTabBarHeadless
@@ -479,7 +508,7 @@ describe("CUSTOMIZATION.md component contract", () => {
     });
 });
 
-describe("CUSTOMIZATION.md navigation customization", () => {
+describe("PROPS.md navigation customization", () => {
     test("maps navigator appearance options and wrapper overrides", async () => {
         const dispatch = mock(() => undefined);
         const emit = mock(() => ({ defaultPrevented: false }));

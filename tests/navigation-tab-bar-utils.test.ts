@@ -13,6 +13,7 @@ const badgeStyle = { color: "white" } as const;
 
 const baseItem: TabsItem = {
     accessibilityLabel: "Open home",
+    activeBadgeStyle: { color: "black" },
     activeIcon: ActiveIcon,
     badge: 3,
     badgeStyle,
@@ -59,6 +60,7 @@ describe("areItemsEqual", () => {
         ["inactiveIcon", () => null],
         ["badge", 4],
         ["badgeStyle", { color: "black" }],
+        ["activeBadgeStyle", { color: "white" }],
         ["accessibilityLabel", "Open search"],
         ["testID", "search-tab"],
     ];

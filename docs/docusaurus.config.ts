@@ -64,7 +64,7 @@ const config: Config = {
                     items: [
                         { label: "Getting Started", to: "/docs/intro" },
                         { label: "Installation", to: "/docs/installation" },
-                        { label: "Customization", to: "/docs/customization/colors" },
+                        { label: "Customization", to: "/docs/customization/theming" },
                     ],
                 },
                 {

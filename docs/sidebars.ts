@@ -20,11 +20,10 @@ const sidebars: SidebarsConfig = {
             label: "Customization",
             collapsed: false,
             items: [
-                "customization/colors",
+                "customization/theming",
                 "customization/layout",
+                "customization/items",
                 "customization/motion",
-                "customization/backdrops",
-                "customization/touch",
             ],
         },
         {

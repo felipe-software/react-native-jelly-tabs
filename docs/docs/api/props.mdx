@@ -60,7 +60,8 @@ interface TabsItem {
     accessibilityLabel?: string;
     labelStyle?: StyleProp<TextStyle>;
     badge?: number | string;
-    badgeStyle?: StyleProp<TextStyle>;
+    badgeStyle?: StyleProp<TextStyle>; // both copies of the tab
+    activeBadgeStyle?: StyleProp<TextStyle>; // layered over it inside the mask
     testID?: string;
 }
 
@@ -90,5 +91,18 @@ interface TabBarConfig {
 }
 ```
 
-See **[Customization](../customization/colors)** for defaults and live examples of
-each group.
+## Navigator options
+
+`JellyTabBar` reads the standard tab options from each screen's descriptor:
+`title`, string `tabBarLabel`, `tabBarLabelStyle`, `tabBarIcon`,
+`tabBarShowLabel`, `tabBarBadge`, `tabBarBadgeStyle`, `tabBarActiveBadgeStyle`,
+`tabBarAccessibilityLabel`, `tabBarButtonTestID`, `tabBarActiveTintColor`,
+`tabBarInactiveTintColor`, `tabBarActiveBackgroundColor`,
+`tabBarInactiveBackgroundColor`, `tabBarBackground`, `tabBarStyle`, and Expo
+Router's `href: null` for hidden tabs. It emits `tabPress` and `tabLongPress`.
+
+Function-valued `tabBarLabel` and custom tab buttons are not rendered by the Jelly
+layout.
+
+See **[Theming](../customization/theming)** for defaults and live examples of each
+group.

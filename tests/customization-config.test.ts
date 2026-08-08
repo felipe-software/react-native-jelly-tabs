@@ -9,7 +9,7 @@ import {
     TABBAR_LAYOUT,
 } from "../src/constants";
 
-describe("CUSTOMIZATION.md defaults", () => {
+describe("PROPS.md defaults", () => {
     test("keeps the documented color, opacity and layout defaults", () => {
         expect(DEFAULT_TAB_BAR_COLORS).toEqual({
             activeContent: "#11100f",

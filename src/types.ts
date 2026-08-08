@@ -30,6 +30,11 @@ export interface TabsItem {
     inactiveIcon: TabsIcon;
     badge?: number | string;
     badgeStyle?: StyleProp<TextStyle>;
+    /**
+     * Layered over `badgeStyle` for the tab copy revealed through the pill
+     * mask, so a badge can read differently once the pill covers it.
+     */
+    activeBadgeStyle?: StyleProp<TextStyle>;
     testID?: string;
 }
 
@@ -78,6 +83,7 @@ export interface JellyNavigationOptions {
     href?: unknown;
     tabBarAccessibilityLabel?: string;
     tabBarActiveBackgroundColor?: unknown;
+    tabBarActiveBadgeStyle?: StyleProp<TextStyle>;
     tabBarActiveTintColor?: unknown;
     tabBarBackground?: () => ReactNode;
     tabBarBadge?: number | string;

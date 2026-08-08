@@ -3,7 +3,7 @@ import useBaseUrl from "@docusaurus/useBaseUrl";
 import styles from "./StorybookPreview.module.css";
 
 export interface StorybookPreviewProps {
-    /** Story id, e.g. `customization-colors--amber`. */
+    /** Story id, e.g. `customization-theming--palette`. */
     id: string;
     /** Iframe height in pixels. */
     height?: number;
@@ -33,6 +33,7 @@ export default function StorybookPreview({
                 src={`${iframeBase}?${query}`}
                 style={{ height }}
                 loading="lazy"
+                allow="clipboard-write"
             />
             <div className={styles.footer}>
                 <Link

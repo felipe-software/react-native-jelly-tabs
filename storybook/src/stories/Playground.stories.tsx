@@ -17,5 +17,8 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-/** Tweak every knob live — colors, blur, layout and touch feedback. */
+/**
+ * Every knob in one place — palette, blur, layout, badges and touch feedback.
+ * Hit **Copy props** on the preview to take the current state into your code.
+ */
 export const Default: Story = {};

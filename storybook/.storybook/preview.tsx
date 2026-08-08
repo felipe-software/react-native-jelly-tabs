@@ -9,9 +9,8 @@ const preview = {
             storySort: {
                 order: [
                     "Getting Started",
-                    "JellyTabs",
                     "Customization",
-                    ["Colors", "Layout", "Motion", "Backdrops", "Touch"],
+                    ["Theming", "Layout", "Items", "Motion"],
                 ],
             },
         },

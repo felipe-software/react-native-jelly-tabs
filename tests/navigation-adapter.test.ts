@@ -29,7 +29,9 @@ const descriptors: Readonly<Record<string, JellyNavigationDescriptor>> = {
         options: {
             href: "/",
             tabBarAccessibilityLabel: "Open home",
+            tabBarActiveBadgeStyle: { backgroundColor: "gold" },
             tabBarBadge: 3,
+            tabBarBadgeStyle: { backgroundColor: "purple" },
             tabBarButtonTestID: "home-tab",
             tabBarLabel: "Home",
         },
@@ -99,7 +101,9 @@ describe("React Navigation item mapping", () => {
         expect(items).toHaveLength(2);
         expect(items[0]).toMatchObject({
             accessibilityLabel: "Open home",
+            activeBadgeStyle: { backgroundColor: "gold" },
             badge: 3,
+            badgeStyle: { backgroundColor: "purple" },
             key: "home-key",
             label: "Home",
             testID: "home-tab",

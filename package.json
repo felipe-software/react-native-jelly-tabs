@@ -21,7 +21,8 @@
     },
     "files": [
         "dist",
-        "src"
+        "src",
+        "PROPS.md"
     ],
     "repository": {
         "type": "git",

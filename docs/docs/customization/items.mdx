@@ -1,0 +1,128 @@
+---
+sidebar_position: 3
+title: Items & badges
+---
+
+# Items & badges
+
+Everything on a single tab: its two icons, its label, and its badge.
+
+## Icons
+
+Each item supplies **two** render functions. `inactiveIcon` is drawn in the track;
+`activeIcon` is revealed through the animated pill mask. Because they are separate
+components, the selected state can use a completely different glyph — a filled
+version, a different shape, anything.
+
+```tsx
+const items: TabsItem[] = [
+    {
+        key: "home",
+        label: "Home",
+        activeIcon: HomeFilledIcon,
+        inactiveIcon: HomeOutlineIcon,
+    },
+];
+```
+
+Both receive the resolved palette, so an icon can paint its own accents:
+
+```ts
+interface TabsIconProps {
+    color: string; // resolved active/inactive content color
+    colors: Readonly<TabBarColors>; // full palette
+    size: number; // resolved icon size
+    opacity: number; // resolved layer opacity
+}
+```
+
+## Labels
+
+`label` is limited to one line and truncates with a trailing ellipsis. Restyle it
+per item with `labelStyle`; the resolved content color and weight are applied
+first, so your style wins.
+
+```tsx
+{ key: "home", label: "Home", labelStyle: { letterSpacing: 2 } }
+```
+
+## Badges
+
+`badge` takes a **number or a string**, so a count, an overflow marker (`9+`) and a
+bare dot all work. The badge sits on the icon's top-right corner and scales with
+`displayScale`.
+
+```tsx
+const items: TabsItem[] = [
+    { key: "home", label: "Home", badge: 3, /* ...icons */ },
+    { key: "settings", label: "Settings", badge: "9+", /* ...icons */ },
+    { key: "walls", label: "Walls", badge: "•", /* ...icons */ },
+];
+```
+
+<StorybookPreview id="customization-items--badges" height={340} />
+
+Defaults are a `#FF3B30` pill with white `700` text, `16pt` tall. Override any of
+it with `badgeStyle` — a plain `TextStyle`, so `backgroundColor`, `color`,
+`fontSize`, `borderRadius` and friends all apply.
+
+```tsx
+{ key: "home", label: "Home", badge: 3, badgeStyle: { backgroundColor: "#38BDF8", color: "#082F49" } }
+```
+
+<StorybookPreview id="customization-items--badge-style" height={340} />
+
+### Different colors inside and outside the mask
+
+Jelly Tabs renders the tab row **twice**: once in the track, and once inside the
+pill mask, which the animated pill wipes across. `badgeStyle` applies to both
+copies. `activeBadgeStyle` is layered **over** `badgeStyle` for the masked copy
+only — so a badge can be red on the dark track and invert the moment the pill
+slides over it.
+
+```tsx
+{
+    key: "home",
+    label: "Home",
+    badge: 3,
+    badgeStyle: { backgroundColor: "#EF4444", color: "#FFFFFF" }, // in the track
+    activeBadgeStyle: { backgroundColor: "#451A03", color: "#F59E0B" }, // under the pill
+}
+```
+
+Drag the pill across the tabs to watch the swap happen mid-wipe:
+
+<StorybookPreview id="customization-items--badge-inside-and-outside-the-mask" height={360} />
+
+:::tip
+The same trick reads well as *reveal* rather than *recolor* — set
+`activeBadgeStyle: { opacity: 0 }` to hide a badge once its tab is selected.
+:::
+
+### From the navigator
+
+With `JellyTabBar`, badges come from the standard screen options, and
+`tabBarActiveBadgeStyle` maps to `activeBadgeStyle`:
+
+```tsx
+<Tabs.Screen
+    name="inbox"
+    options={{
+        title: "Inbox",
+        tabBarBadge: 3,
+        tabBarBadgeStyle: { backgroundColor: "#EF4444" },
+        tabBarActiveBadgeStyle: { backgroundColor: "#451A03", color: "#F59E0B" },
+    }}
+/>
+```
+
+## Accessibility & testing
+
+| Key | Purpose |
+| --- | --- |
+| `accessibilityLabel` | Announced instead of `label`. Falls back to `label`. |
+| `testID` | Set on the item's accessibility tab node. |
+
+Each item is exposed as a `tab` with its selected state, and supports the
+`activate` and `longpress` accessibility actions without replacing the continuous
+drag gesture.

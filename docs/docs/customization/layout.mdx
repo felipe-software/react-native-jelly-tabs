@@ -10,12 +10,24 @@ title: Layout
 ```tsx
 <JellyTabBar
     {...props}
-    config={{ layout: { trackHeight: 84, iconSize: 34, trackInset: 8 } }}
+    config={{ layout: { trackHeight: 84, itemHeight: 72, iconSize: 34, trackInset: 8 } }}
 />
 ```
 
 <StorybookPreview id="customization-layout--tall" height={380} />
 <StorybookPreview id="customization-layout--compact" height={320} />
+
+| Key | Default | Description |
+| --- | --- | --- |
+| `iconSize` | `28` | Base icon size passed to each icon. |
+| `itemHeight` | `56` | Height of a single tab / the selected pill. |
+| `trackHeight` | `64` | Height of the track. |
+| `trackInset` | `4` | Padding between the track edge and the items. |
+| `maskOverscanX` | `48` | Horizontal overscan for the pill mask. |
+| `maskOverscanY` | `16` | Vertical overscan for the pill mask. |
+
+The overscan values give the pill room to stretch past the track while it snaps.
+Raise them if a heavily inflated pill (`pillJelly.pressedScale`) looks clipped.
 
 ## Width
 
@@ -27,18 +39,16 @@ The bar centers inside wider parents and defaults to `maxWidth={400}`.
 
 <StorybookPreview id="customization-layout--full-width" height={340} />
 
-## Keys
+## Scaling everything at once
 
-| Key | Default | Description |
-| --- | --- | --- |
-| `iconSize` | `28` | Base icon size passed to each icon. |
-| `itemHeight` | `56` | Height of a single tab / the selected pill. |
-| `trackHeight` | `64` | Height of the track. |
-| `trackInset` | `4` | Padding between the track edge and items. |
-| `maskOverscanX` | `48` | Horizontal overscan for the pill mask. |
-| `maskOverscanY` | `16` | Vertical overscan for the pill mask. |
+`displayScale` multiplies every layout dimension — track, items, icons, insets,
+labels and badges — in one number. Useful for thumbnails and recordings.
+
+```tsx
+<JellyTabBar {...props} displayScale={0.75} />
+```
 
 :::tip
 `JellyTabBarHeadless` reserves no space of its own — wrap it in a view whose
-height equals `trackHeight × displayScale`.
+height equals `trackHeight × displayScale`. `JellyTabBar` already does this.
 :::
