@@ -1,0 +1,48 @@
+---
+sidebar_position: 3
+title: Quick start
+---
+
+# Quick start
+
+Drop `JellyTabBar` into your navigator's `tabBar` prop. It reads `state`,
+`descriptors`, `navigation` and `insets` from the navigator — you don't pass them.
+
+```tsx title="app/_layout.tsx (Expo Router)"
+import { MaterialIcons } from "@react-native-vector-icons/material-icons";
+import { Tabs } from "expo-router";
+import { JellyTabBar } from "react-native-jelly-tabs";
+
+export default function TabLayout() {
+    return (
+        <Tabs tabBar={(props) => <JellyTabBar {...props} floating />}>
+            <Tabs.Screen
+                name="index"
+                options={{
+                    title: "Home",
+                    tabBarIcon: ({ color, size }) => (
+                        <MaterialIcons color={color} name="home" size={size} />
+                    ),
+                }}
+            />
+            <Tabs.Screen
+                name="settings"
+                options={{
+                    title: "Settings",
+                    tabBarIcon: ({ color, size }) => (
+                        <MaterialIcons color={color} name="settings" size={size} />
+                    ),
+                }}
+            />
+        </Tabs>
+    );
+}
+```
+
+<StorybookPreview id="getting-started-playground--default" height={380} />
+
+That's it. From here:
+
+- Wire it to your router → **[Expo Router](./guides/expo-router)** · **[React Navigation](./guides/react-navigation)**
+- Skip the router entirely → **[Headless](./guides/headless)**
+- Make it yours → **[Theming](./customization/theming)**

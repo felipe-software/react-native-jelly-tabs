@@ -21,7 +21,8 @@
     },
     "files": [
         "dist",
-        "src"
+        "src",
+        "PROPS.md"
     ],
     "repository": {
         "type": "git",
@@ -46,6 +47,12 @@
         "example-simple:ios": "bun run --cwd example-simple ios",
         "example-simple:pack": "bun pm pack --destination example-simple/vendor",
         "example-simple:web": "bun run --cwd example-simple web",
+        "storybook": "bun run --cwd storybook storybook",
+        "storybook:build": "bun run --cwd storybook build",
+        "docs": "bun run --cwd docs start",
+        "docs:previews": "bun run --cwd storybook build:embed",
+        "docs:build": "bun run docs:previews && bun run --cwd docs build",
+        "docs:serve": "bun run --cwd docs serve",
         "prepublishOnly": "bun run build",
         "release": "semantic-release",
         "release:dry-run": "semantic-release --dry-run",
@@ -75,6 +82,7 @@
         "react-native-gesture-handler": "^3.1.0",
         "react-native-reanimated": "4.5.1",
         "react-native-svg": "15.15.4",
+        "react-native-web": "~0.21.0",
         "test-renderer": "1.2.0",
         "conventional-changelog-conventionalcommits": "^10.2.1",
         "semantic-release": "^25.0.5",
@@ -83,7 +91,9 @@
     },
     "workspaces": [
         "example",
-        "example-simple"
+        "example-simple",
+        "storybook",
+        "docs"
     ],
     "engines": {
         "node": ">=18"

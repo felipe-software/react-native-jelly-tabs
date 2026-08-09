@@ -1,0 +1,48 @@
+---
+sidebar_position: 2
+title: Installation
+---
+
+# Installation
+
+```bash
+npm install react-native-jelly-tabs
+```
+
+Install the peer dependencies:
+
+```bash title="Expo"
+npx expo install @react-native-masked-view/masked-view react-native-gesture-handler react-native-reanimated react-native-svg
+```
+
+```bash title="Bare React Native"
+npm install @react-native-masked-view/masked-view react-native-gesture-handler react-native-reanimated react-native-svg
+```
+
+Then rebuild the native app — `npx expo prebuild` on Expo, or `pod install` + a fresh
+build on bare React Native.
+
+Wrap your app once in `GestureHandlerRootView` (a Gesture Handler requirement):
+
+```tsx title="App.tsx"
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+
+export default function App() {
+    return (
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            {/* ...app */}
+        </GestureHandlerRootView>
+    );
+}
+```
+
+## Compatible versions
+
+Jelly Tabs works across several majors of each native dependency, so it matches
+whatever your app already uses:
+
+| Package | Supported range |
+| --- | --- |
+| React Native | `>=0.76` |
+| Gesture Handler | `>=2.25 <4` (v3 needs React Native `>=0.82`) |
+| Reanimated | `>=3.16 <5` |

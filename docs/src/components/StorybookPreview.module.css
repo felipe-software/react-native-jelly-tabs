@@ -1,0 +1,29 @@
+.wrap {
+    width: 100%;
+    margin: 1.4rem 0;
+    border: 1px solid var(--ifm-toc-border-color);
+    border-radius: 14px;
+    overflow: hidden;
+    background: #0e0d0c;
+    box-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.7);
+}
+
+.frame {
+    display: block;
+    width: 100%;
+    border: 0;
+    background: transparent;
+}
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.4rem 0.85rem;
+    border-top: 1px solid var(--ifm-toc-border-color);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.open {
+    font-weight: 600;
+    font-size: 0.78rem;
+}

@@ -1,0 +1,60 @@
+---
+sidebar_position: 3
+title: Headless
+---
+
+# Headless
+
+Use `JellyTabBarHeadless` when you want the animated bar without any navigation
+integration — custom routers, segmented controls, fully controlled state.
+
+```tsx
+import { useState } from "react";
+import { JellyTabBarHeadless, type TabsItem } from "react-native-jelly-tabs";
+
+const items: TabsItem[] = [
+    { key: "home", label: "Home", activeIcon: HomeIcon, inactiveIcon: HomeIcon },
+    { key: "search", label: "Search", activeIcon: SearchIcon, inactiveIcon: SearchIcon },
+    { key: "profile", label: "Profile", activeIcon: UserIcon, inactiveIcon: UserIcon },
+];
+
+export function Bar() {
+    const [selectedIndex, setSelectedIndex] = useState(0);
+    return (
+        <JellyTabBarHeadless
+            items={items}
+            selectedIndex={selectedIndex}
+            onTabPress={({ index }) => setSelectedIndex(index)}
+        />
+    );
+}
+```
+
+<StorybookPreview id="getting-started-playground--default" height={360} />
+
+## Controlled vs uncontrolled
+
+- **Uncontrolled** — omit `selectedIndex`; the bar tracks selection internally.
+- **Controlled** — pass `selectedIndex` and update it from `onTabPress` /
+  `onTabChange`. Pass `null` (or a negative index) to render no selected pill.
+
+## Icons
+
+Each item supplies **two** render functions — `inactiveIcon` (drawn in the track)
+and `activeIcon` (revealed through the animated pill mask). They can be entirely
+different glyphs.
+
+```tsx
+const HomeIcon = ({ color, size }: TabsIconProps) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+        <Path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" fill={color} />
+    </Svg>
+);
+```
+
+## Sizing
+
+`JellyTabBarHeadless` adds no safe-area inset of its own. Give it a wrapper whose
+height matches `config.layout.trackHeight` (default `64`) times `displayScale`.
+
+See the full prop list in the **[API reference](../api/props)**.

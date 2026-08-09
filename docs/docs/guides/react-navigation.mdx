@@ -1,0 +1,66 @@
+---
+sidebar_position: 2
+title: React Navigation
+---
+
+# React Navigation
+
+The same component works as the `tabBar` for React Navigation's bottom tabs.
+
+```tsx title="Navigator.tsx"
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { JellyTabBar } from "react-native-jelly-tabs";
+
+const Tab = createBottomTabNavigator();
+
+export function Navigator() {
+    return (
+        <Tab.Navigator tabBar={(props) => <JellyTabBar {...props} />}>
+            <Tab.Screen
+                name="Home"
+                component={HomeScreen}
+                options={{
+                    tabBarIcon: ({ color, size }) => (
+                        <HomeIcon color={color} size={size} />
+                    ),
+                }}
+            />
+            <Tab.Screen
+                name="Profile"
+                component={ProfileScreen}
+                options={{
+                    tabBarBadge: "9+",
+                    tabBarIcon: ({ color, size }) => (
+                        <ProfileIcon color={color} size={size} />
+                    ),
+                }}
+            />
+        </Tab.Navigator>
+    );
+}
+```
+
+<StorybookPreview id="customization-items--badges" height={360} />
+
+The navigator supplies `state`, `descriptors`, `navigation` and `insets` — don't
+pass them manually. Selection stays in sync with deep links, hardware back and
+programmatic navigation.
+
+## Common overrides
+
+```tsx
+<Tab.Navigator
+    tabBar={(props) => (
+        <JellyTabBar
+            {...props}
+            floating
+            maxWidth={360}
+            colors={{ selectedSurface: "#2563EB", surface: "#18181B" }}
+        />
+    )}
+/>
+```
+
+Every visual prop from the [headless component](./headless) — `colors`,
+`opacity`, `config`, `backdrop`, touch feedback — is accepted here too. See
+**[Theming](../customization/theming)**.

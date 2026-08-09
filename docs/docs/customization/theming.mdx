@@ -1,0 +1,115 @@
+---
+sidebar_position: 1
+title: Theming
+---
+
+# Theming
+
+Four colors, four opacities, two backdrop slots and a touch gradient. Every
+preview on this page has a **Copy props** button — set it up visually, then paste.
+
+<StorybookPreview id="customization-theming--palette" height={360} />
+
+## Colors
+
+`colors` takes solid React Native color strings and merges over the defaults, so
+you usually set only the pill color.
+
+```tsx
+<JellyTabBar
+    {...props}
+    colors={{
+        surface: "#1C1917", // track background
+        selectedSurface: "#F59E0B", // selected pill
+        activeContent: "#451A03", // selected icon / label
+        inactiveContent: "#A8A29E", // unselected icon / label
+    }}
+/>
+```
+
+| Key | Default | Role |
+| --- | --- | --- |
+| `surface` | `#22211f` | Track background |
+| `selectedSurface` | `#f2eee7` | Selected pill |
+| `activeContent` | `#11100f` | Selected icon / label |
+| `inactiveContent` | `#b8b4ad` | Unselected icon / label |
+
+<StorybookPreview id="customization-theming--mono" height={320} />
+
+## Opacity
+
+`opacity` fades those same four layers independently, clamped `0`–`1`. It applies
+to the rendered content, not the mask, so the animated pill keeps a fully opaque
+clipping shape.
+
+```tsx
+<JellyTabBar {...props} opacity={{ surface: 0.55, inactiveContent: 0.7 }} />
+```
+
+<StorybookPreview id="customization-theming--opacity" height={320} />
+
+## Backdrops
+
+`backdrop` and `selectedBackdrop` are React nodes rendered **below** the track and
+selected-pill color layers. Jelly Tabs renders whatever you pass, which keeps blur
+provider-agnostic — pair it with a translucent `surface` so the blur shows through.
+
+```tsx title="With expo-blur"
+import { BlurView } from "expo-blur";
+
+<JellyTabBar
+    {...props}
+    backdrop={<BlurView intensity={35} tint="dark" style={StyleSheet.absoluteFill} />}
+    selectedBackdrop={<BlurView intensity={20} tint="light" style={StyleSheet.absoluteFill} />}
+/>;
+```
+
+<StorybookPreview id="customization-theming--blur" height={360} />
+
+Omit both and the solid colors carry the bar:
+
+<StorybookPreview id="customization-theming--solid" height={320} />
+
+:::note
+The previews use a CSS `backdrop-filter` shim so they run on the web. On device,
+reach for `expo-blur`, `@react-native-community/blur`, or your own component.
+:::
+
+## Touch feedback
+
+A soft **radial gradient** follows your finger. It is drawn twice — once under the
+whole track and once inside the pill mask, so it stays visible as it crosses the
+selected tab — and it defaults to `colors.selectedSurface`.
+
+```tsx
+<JellyTabBar
+    {...props}
+    touchFeedbackColor="#38BDF8"
+    touchFeedbackOpacity={0.45}
+    touchFeedbackScale={2.4}
+/>
+```
+
+<StorybookPreview id="customization-motion--touch-feedback" height={340} />
+
+| Prop | Default | Description |
+| --- | --- | --- |
+| `touchFeedbackEnabled` | `true` | Toggles the gradient. |
+| `touchFeedbackColor` | `colors.selectedSurface` | Gradient color. |
+| `touchFeedbackOpacity` | `0.15` | Opacity of the gradient's center stop. |
+| `touchFeedbackScale` | `2` | Multiplier on the `150px` base radius. |
+
+The gradient has three stops: the center at `touchFeedbackOpacity`, a middle stop
+at `45%` scaled by `config.distortion.touchFeedback.middleOpacityRatio` (`0.43`),
+and a fully transparent edge. Tune the falloff through `config`:
+
+```tsx
+<JellyTabBar
+    {...props}
+    config={{ distortion: { touchFeedback: { middleOpacityRatio: 0.8, radius: 90 } } }}
+/>
+```
+
+Turn it off entirely with `touchFeedbackEnabled={false}`:
+
+<StorybookPreview id="customization-motion--no-touch-feedback" height={320} />

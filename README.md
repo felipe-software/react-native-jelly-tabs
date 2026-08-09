@@ -22,6 +22,7 @@ Demo at: https://jelly.felipe.software/
 - Expo Router hidden tabs through `href: null`, including hidden focused routes with no false selection.
 - Per-tab accessibility semantics for VoiceOver and TalkBack, including selected state and activation actions.
 - Navigation badges, test IDs, accessibility labels, label styles and `tabLongPress` events.
+- Badges that can restyle themselves as the pill wipes over them (`activeBadgeStyle`).
 - Headless component for custom routers and fully controlled tab state.
 - Custom icons, colors, opacity, sizing, springs, distortion, backdrops and touch feedback.
 - Compatible with Reanimated 3–4 and Gesture Handler 2–3 within the supported React Native ranges below.
@@ -120,7 +121,28 @@ Each item takes an `activeIcon` and an `inactiveIcon` render function.
 
 `JellyTabBarHeadless` adds no safe-area inset of its own. Give it a wrapper whose height matches `config.layout.trackHeight` (default `64`) times `displayScale`. 
 
-Colors, opacity, layout, jelly springs, distortion, backdrops and touch feedback are all configurable. See **[CUSTOMIZATION.md](./CUSTOMIZATION.md)** for every prop and config value.
+Colors, opacity, layout, jelly springs, distortion, backdrops, badges and the touch-feedback gradient are all configurable.
+
+## Documentation
+
+**https://jelly.felipe.software/docs** — guides and live, interactive previews. Every
+example is a real Storybook story rendered through React Native Web, so what you read is
+what runs, and each preview has a **Copy props** button that hands you the current setup
+as JSX or as a plain config object.
+
+**[PROPS.md](./PROPS.md)** is the flat reference: every prop, type and default in one file.
+
+The site lives in [`docs/`](./docs) (Docusaurus) and the stories in [`storybook/`](./storybook).
+
+```sh
+bun run docs:previews   # build Storybook into docs/static/storybook
+bun run docs            # start the docs site (previews must be built first)
+bun run storybook       # open Storybook on its own (port 7007)
+bun run docs:build      # full static build (previews + docs) → docs/build
+```
+
+`docs/build` is a plain static bundle, ready to deploy to Cloudflare Workers
+(see [`docs/wrangler.jsonc`](./docs/wrangler.jsonc)).
 
 ## Development
 

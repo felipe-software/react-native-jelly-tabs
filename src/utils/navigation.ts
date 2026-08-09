@@ -81,6 +81,7 @@ export const getNavigationItems = (
         const options = descriptors[route.key]?.options ?? {};
         return {
             accessibilityLabel: options.tabBarAccessibilityLabel,
+            activeBadgeStyle: options.tabBarActiveBadgeStyle,
             activeIcon: resolveIcon(options, true),
             badge: options.tabBarBadge,
             badgeStyle: options.tabBarBadgeStyle,

@@ -1,0 +1,83 @@
+---
+sidebar_position: 4
+title: Motion
+---
+
+# Motion
+
+The jelly feel comes from two config groups: `pillJelly` (the indicator's spring
+and snap behaviour) and `distortion` (how the whole track squishes and follows
+your finger). Both are deep-partial.
+
+<StorybookPreview id="customization-motion--default" height={360} />
+
+## `pillJelly`
+
+```tsx
+<JellyTabBar
+    {...props}
+    config={{
+        pillJelly: {
+            pressedScale: 1.3, // how much the pill inflates while pressed
+            snapOnPointerDown: true, // jump toward the touch immediately
+        },
+    }}
+/>
+```
+
+| Key | Default | Description |
+| --- | --- | --- |
+| `pressedScale` | `1.3` | How much the pill inflates while pressed. |
+| `snapOnPointerDown` | `true` | Snap the indicator toward the touch on press. |
+| `frameConfig.releaseDistanceFraction` | `0.025` | Keeps the indicator inflated until it is within this fraction of its snap point. |
+
+Each spring channel is `{ stiffness, dampingRatio }`:
+
+| Spring | `stiffness` | `dampingRatio` | Drives |
+| --- | --- | --- | --- |
+| `value` | `1000` | `1` | The pill's position along the track. |
+| `velocity` | `300` | `0.5` | Velocity tracking that feeds the stretch. |
+| `scaleX` | `250` | `0.6` | Horizontal stretch — the "goo". |
+| `scaleY` | `250` | `0.7` | Vertical squash. |
+| `press` | `1000` | `1` | The press inflation. |
+| `panel` | `300` | `1` | The whole panel's follow. |
+
+```tsx
+config={{
+    pillJelly: {
+        frameConfig: {
+            springs: { scaleX: { stiffness: 160, dampingRatio: 0.4 } },
+        },
+    },
+}}
+```
+
+Lower `dampingRatio` and `stiffness` for more wobble; raise both for a flat snap:
+
+<StorybookPreview id="customization-motion--wobbly" height={340} />
+<StorybookPreview id="customization-motion--snappy" height={340} />
+
+## `distortion`
+
+| Key | Default | Description |
+| --- | --- | --- |
+| `pressedScale` | `1.025` | Whole-track scale while pressed. |
+| `spring.damping` | `18` | Distortion spring damping. |
+| `spring.mass` | `0.9` | Distortion spring mass. |
+| `spring.stiffness` | `240` | Distortion spring stiffness. |
+| `verticalDrag.distortion` | `0.08` | How much vertical drag squishes the track width. |
+| `verticalDrag.distanceForMaxDistortion` | `700` | Drag distance (px) for max distortion. |
+| `verticalDrag.follow` | `0.25` | How much the track follows the finger vertically. |
+| `verticalDrag.rubberBand` | `0.14` | Rubber-band resistance on the vertical follow. |
+
+Drag the bar **downwards** in this preview — the follow and squish are turned up:
+
+<StorybookPreview id="customization-motion--heavy-drag" height={380} />
+
+`distortion.touchFeedback` also lives in this group; it is covered under
+**[Theming → Touch feedback](./theming#touch-feedback)**.
+
+:::tip
+Need a complete, mutable config object to start from? Call
+`resolveTabBarConfig(partial?)`.
+:::

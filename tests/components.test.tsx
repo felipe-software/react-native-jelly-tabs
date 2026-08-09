@@ -319,6 +319,7 @@ describe("PillMaskedView", () => {
         expect(animatedViews).toHaveLength(2);
         expect(flattenStyle(animatedViews[0]?.props.style)).toMatchObject({
             borderRadius: 28,
+            clipPath: "inset(0 round 999px)",
             height: 56,
             left: 52,
             overflow: "hidden",

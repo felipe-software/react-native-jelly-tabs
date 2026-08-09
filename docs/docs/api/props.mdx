@@ -1,0 +1,108 @@
+---
+sidebar_position: 1
+title: Props & types
+---
+
+# API reference
+
+All props are optional except `items`. Anything you omit falls back to the
+built-in defaults. `JellyTabBar` accepts the same visual props while sourcing its
+items and selection from the navigator.
+
+## `<JellyTabBarHeadless />`
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `items` | `TabsItem[]` | — | The tabs to render (**required**). |
+| `maxWidth` | `DimensionValue` | `400` | Maximum track width; stays centered in wider parents. |
+| `selectedIndex` | `number \| null` | uncontrolled | Controlled index. `null`/negative renders no pill. |
+| `onTabPress` | `(e: TabsChangeEvent) => boolean \| void` | — | After every tap/drag. Return `false` to reject. |
+| `onTabLongPress` | `(e: TabsChangeEvent) => void` | — | When a tab is held. |
+| `onTabChange` | `(e: TabsChangeEvent) => void` | — | After an accepted change. |
+| `colors` | `Partial<TabBarColors>` | palette | Solid color per layer. |
+| `opacity` | `Partial<TabBarOpacity>` | all `1` | Per-layer opacity, clamped `0`–`1`. |
+| `config` | `DeepPartial<TabBarConfig>` | defaults | Layout, jelly and distortion overrides. |
+| `backdrop` | `ReactNode` | — | Node below the track color layer. |
+| `selectedBackdrop` | `ReactNode` | — | Node below the selected-pill layer. |
+| `displayScale` | `number` | `1` | Scales every layout dimension. |
+| `touchFeedbackEnabled` | `boolean` | `true` | Toggles the radial touch feedback. |
+| `touchFeedbackColor` | `string` | `colors.selectedSurface` | Feedback color. |
+| `touchFeedbackOpacity` | `number` | `0.15` | Feedback opacity. |
+| `touchFeedbackScale` | `number` | `2` | Feedback radius scale. |
+| `recording` | `boolean` | `false` | Deterministic mode for clean captures. |
+
+`JellyTabs` remains available as a deprecated alias for `JellyTabBarHeadless`.
+
+## `<JellyTabBar />`
+
+Pass it straight to the navigator's `tabBar` callback — the navigator supplies
+`state`, `descriptors`, `navigation` and `insets`.
+
+```tsx
+<Tabs tabBar={(props) => <JellyTabBar {...props} floating />} />
+```
+
+Extra props on top of the headless visual props:
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `floating` | `boolean` | Absolutely position the bar over the screen. |
+| `containerStyle` | `StyleProp<ViewStyle>` | Wrapper overrides. |
+
+## Types
+
+```ts
+interface TabsItem {
+    key: string;
+    label: string;
+    activeIcon: TabsIcon; // revealed through the pill mask
+    inactiveIcon: TabsIcon; // drawn in the track
+    accessibilityLabel?: string;
+    labelStyle?: StyleProp<TextStyle>;
+    badge?: number | string;
+    badgeStyle?: StyleProp<TextStyle>; // both copies of the tab
+    activeBadgeStyle?: StyleProp<TextStyle>; // layered over it inside the mask
+    testID?: string;
+}
+
+interface TabsChangeEvent {
+    index: number;
+    item: TabsItem;
+}
+
+interface TabsIconProps {
+    color: string; // resolved active/inactive content color
+    colors: Readonly<TabBarColors>; // full palette
+    size: number; // resolved icon size
+    opacity: number; // resolved layer opacity
+}
+
+interface TabBarColors {
+    surface: string; // track background
+    selectedSurface: string; // selected pill
+    activeContent: string; // selected icon/label
+    inactiveContent: string; // unselected icon/label
+}
+
+interface TabBarConfig {
+    layout: TabBarLayoutConfig;
+    pillJelly: PillJellyConfig;
+    distortion: DistortionConfig;
+}
+```
+
+## Navigator options
+
+`JellyTabBar` reads the standard tab options from each screen's descriptor:
+`title`, string `tabBarLabel`, `tabBarLabelStyle`, `tabBarIcon`,
+`tabBarShowLabel`, `tabBarBadge`, `tabBarBadgeStyle`, `tabBarActiveBadgeStyle`,
+`tabBarAccessibilityLabel`, `tabBarButtonTestID`, `tabBarActiveTintColor`,
+`tabBarInactiveTintColor`, `tabBarActiveBackgroundColor`,
+`tabBarInactiveBackgroundColor`, `tabBarBackground`, `tabBarStyle`, and Expo
+Router's `href: null` for hidden tabs. It emits `tabPress` and `tabLongPress`.
+
+Function-valued `tabBarLabel` and custom tab buttons are not rendered by the Jelly
+layout.
+
+See **[Theming](../customization/theming)** for defaults and live examples of each
+group.

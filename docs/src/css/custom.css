@@ -1,0 +1,29 @@
+/* Brand: warm amber accent on a dark stage — matches the example app. */
+:root {
+    --ifm-color-primary: #d9880a;
+    --ifm-color-primary-dark: #c37a09;
+    --ifm-color-primary-darker: #b87308;
+    --ifm-color-primary-darkest: #975f07;
+    --ifm-color-primary-light: #ef960b;
+    --ifm-color-primary-lighter: #f59e0b;
+    --ifm-color-primary-lightest: #f7b23a;
+    --ifm-code-font-size: 90%;
+    --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] {
+    --ifm-color-primary: #f59e0b;
+    --ifm-color-primary-dark: #dd8e0a;
+    --ifm-color-primary-darker: #d08609;
+    --ifm-color-primary-darkest: #ab6f08;
+    --ifm-color-primary-light: #f7ab2b;
+    --ifm-color-primary-lighter: #f8b139;
+    --ifm-color-primary-lightest: #f9c164;
+    --ifm-background-color: #100f0e;
+    --ifm-background-surface-color: #17130f;
+    --docusaurus-highlighted-code-line-bg: rgba(255, 255, 255, 0.06);
+}
+
+.markdown h1:first-child {
+    letter-spacing: -0.02em;
+}

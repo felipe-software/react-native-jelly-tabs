@@ -1,0 +1,11 @@
+{
+  // Cloudflare Workers static-assets deploy for the docs site (docs + embedded
+  // Storybook). Build first with `bun run docs:build` (from the repo root), then
+  // `bunx wrangler deploy` from this folder. Rename `name` to take over the
+  // example's Worker when you're ready to replace it.
+  "name": "jelly-tabs-docs",
+  "compatibility_date": "2026-08-04",
+  "assets": {
+    "directory": "./build"
+  }
+}

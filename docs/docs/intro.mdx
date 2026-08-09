@@ -1,0 +1,37 @@
+---
+sidebar_position: 1
+title: Getting Started
+slug: /intro
+---
+
+# Jelly Tabs
+
+A playful, jelly-like animated tab bar for React Native — built with Reanimated,
+Gesture Handler and Masked View. Runs on **Android, iOS and Web**.
+
+<StorybookPreview id="getting-started-playground--default" height={420} />
+
+:::tip
+Every preview here is live. Drag the pill, then hit **Copy props** to take the
+current setup into your code as JSX or as a plain config object.
+:::
+
+```tsx
+import { JellyTabBar } from "react-native-jelly-tabs";
+
+<Tabs tabBar={(props) => <JellyTabBar {...props} floating />}>
+    {/* ...your Tabs.Screen entries */}
+</Tabs>;
+```
+
+## What you get
+
+- Drop-in `tabBar` for **Expo Router** and **React Navigation** bottom tabs.
+- A **headless** component for custom routers and fully controlled state.
+- Gooey snapping, dragging and press feedback powered by Reanimated + Gesture Handler.
+- Navigation-aware selection: deep links, hardware back, `href: null` hidden tabs.
+- Badges that can restyle themselves as the pill wipes over them.
+- Fully themeable — colors, opacity, layout, springs, distortion, backdrops, and a
+  radial touch-feedback gradient.
+
+Next: **[Installation](./installation)** → **[Quick start](./quick-start)**.

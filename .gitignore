@@ -48,6 +48,13 @@ yarn-error.*
 /example-simple/.expo
 /example-simple/expo-env.d.ts
 
+# Docs (Docusaurus) & Storybook build artifacts
+/docs/build
+/docs/.docusaurus
+/storybook/storybook-static
+# Storybook is built into the docs static dir on demand
+/docs/static/storybook
+
 # Dev stuff, I don't want mp4 into the library :)
 /references
 .argent

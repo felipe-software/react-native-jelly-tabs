@@ -150,6 +150,7 @@ export const JellyTabBarHeadless = ({
 
     const tabs = items.map((item) => (
         <TabItem
+            activeBadgeStyle={item.activeBadgeStyle}
             activeColor={resolvedColors.activeContent}
             activeOpacity={activeContentOpacity}
             activeIcon={item.activeIcon}

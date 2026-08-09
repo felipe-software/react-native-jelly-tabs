@@ -11,6 +11,7 @@ import {
 import Animated, { type AnimatedStyle } from "react-native-reanimated";
 
 export interface TabItemProps {
+    activeBadgeStyle?: StyleProp<TextStyle>;
     activeColor?: string;
     activeOpacity?: number;
     badge?: number | string;
@@ -30,6 +31,7 @@ export interface TabItemProps {
 }
 
 export const TabItem = ({
+    activeBadgeStyle,
     activeColor = "#000000",
     activeOpacity = 1,
     badge,
@@ -93,6 +95,7 @@ export const TabItem = ({
                                     top: -5 * displayScale,
                                 },
                                 badgeStyle,
+                                isActive && activeBadgeStyle,
                             ]}
                         >
                             {badge}

@@ -1,0 +1,79 @@
+---
+sidebar_position: 2
+title: Layout
+---
+
+# Layout
+
+`config.layout` controls sizing. It's a deep-partial — pass only the keys you want.
+
+```tsx
+<JellyTabBar
+    {...props}
+    config={{ layout: { trackHeight: 84, itemHeight: 72, iconSize: 34, trackInset: 8 } }}
+/>
+```
+
+<StorybookPreview id="customization-layout--tall" height={380} />
+
+| Key | Default | Description |
+| --- | --- | --- |
+| `iconSize` | `28` | Base icon size passed to each icon. |
+| `itemHeight` | `56` | Height of a single tab / the selected pill. |
+| `trackHeight` | `64` | Height of the track. |
+| `trackInset` | `4` | Padding between the track edge and the items. |
+| `maskOverscanX` | `48` | Horizontal overscan for the pill mask. |
+| `maskOverscanY` | `16` | Vertical overscan for the pill mask. |
+
+The overscan values give the pill room to stretch past the track while it snaps.
+Raise them if a heavily inflated pill (`pillJelly.pressedScale`) looks clipped.
+
+## Icons only
+
+Navigation adapters honor `tabBarShowLabel: false`. With the headless component,
+use an empty visual label and keep `accessibilityLabel` populated.
+
+```tsx
+const iconOnlyItems = items.map((item) => ({
+    ...item,
+    accessibilityLabel: item.label,
+    label: "",
+}));
+
+<JellyTabBarHeadless items={iconOnlyItems} />
+```
+
+<StorybookPreview id="customization-layout--icon-only" height={320} />
+
+## Width
+
+The bar centers inside wider parents and defaults to `maxWidth={400}`.
+
+```tsx
+<JellyTabBar
+    {...props}
+    maxWidth={960}
+    colors={{
+        activeContent: "#F5F3FF",
+        inactiveContent: "#A1A1AA",
+        selectedSurface: "#7C3AED",
+        surface: "#18181B",
+    }}
+/>
+```
+
+<StorybookPreview id="customization-layout--full-width" height={360} />
+
+## Scaling everything at once
+
+`displayScale` multiplies every layout dimension — track, items, icons, insets,
+labels and badges — in one number. Useful for thumbnails and recordings.
+
+```tsx
+<JellyTabBar {...props} displayScale={0.75} />
+```
+
+:::tip
+`JellyTabBarHeadless` reserves no space of its own — wrap it in a view whose
+height equals `trackHeight × displayScale`. `JellyTabBar` already does this.
+:::

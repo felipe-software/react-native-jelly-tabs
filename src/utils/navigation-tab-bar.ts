@@ -16,5 +16,6 @@ export const areItemsEqual = (a: TabsItem, b: TabsItem) =>
     a.inactiveIcon === b.inactiveIcon &&
     a.badge === b.badge &&
     a.badgeStyle === b.badgeStyle &&
+    a.activeBadgeStyle === b.activeBadgeStyle &&
     a.accessibilityLabel === b.accessibilityLabel &&
     a.testID === b.testID;

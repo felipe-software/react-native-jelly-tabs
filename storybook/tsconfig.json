@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "jsx": "react-jsx",
+        "lib": ["ESNext", "DOM"],
+        "strict": true,
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "resolveJsonModule": true,
+        "noEmit": true,
+        "types": ["node", "react", "react-dom"],
+        "paths": {
+            "react-native-jelly-tabs": ["../src/index.ts"]
+        }
+    },
+    "include": [".storybook", "src"]
+}
