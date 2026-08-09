@@ -10,18 +10,15 @@ import {
     type PillJellyFrameState,
 } from "../utils/pill-jelly-animation";
 import { Gesture } from "react-native-gesture-handler";
-import { Platform } from "react-native";
+import { IS_WEB, USES_CLIP_BOX } from "../platform";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
     clamp,
     runOnJS,
     useAnimatedStyle,
-    useDerivedValue,
     useFrameCallback,
     useSharedValue,
 } from "react-native-reanimated";
-
-const IS_WEB = Platform.OS === "web";
 
 const getControlledSelectedIndex = (
     selectedIndex: number | null,
@@ -59,6 +56,7 @@ export const usePillJelly = (
         selectedTouchFeedbackStyle,
         setTrackWidth: setDistortionTrackWidth,
         tabbarStyle,
+        tabbarTransformOrigin,
         touchFeedbackStyle,
         update: updateDistortion,
     } = useDistortion(config, geometryScale, touchFeedbackRadius);
@@ -192,20 +190,35 @@ export const usePillJelly = (
         targetValue,
     ]);
 
-    const panelOffset = useDerivedValue(() => {
-        return getHorizontalPanelOffset(
-            rawPanelOffset.value,
-            trackWidth.value,
-            geometryScale,
-        );
-    });
-
+    // Inlined instead of going through a `useDerivedValue`: the derived value was
+    // a second mapper scheduled every frame just to hand one number to the style
+    // below, and nothing else consumed it.
     const panelStyle = useAnimatedStyle(() => ({
-        transform: [{ translateX: panelOffset.value }],
+        transform: [
+            {
+                translateX: getHorizontalPanelOffset(
+                    rawPanelOffset.value,
+                    trackWidth.value,
+                    geometryScale,
+                ),
+            },
+        ],
     }));
 
+    // `width` used to be returned from this worklet. It only ever changes when the
+    // track is re-measured, but Reanimated cannot know that: on Fabric a layout
+    // prop in an animated style forces a shadow-tree commit + Yoga pass on EVERY
+    // frame instead of writing the transform straight to the view on the UI
+    // thread. The width now comes from a plain style driven by the measured track
+    // (see `PillMaskedView`), leaving this worklet transform-only.
     const getPillMaskStyle = () => {
         "worklet";
+
+        // Only the MaskedView platforms mount this style; on the clip-box
+        // platforms the worklet ran every frame and the result was discarded.
+        if (USES_CLIP_BOX) {
+            return {};
+        }
 
         const tabWidth = getTabWidth(trackWidth.value, trackInset, tabCount);
         const velocity = filteredVelocity.value / 10;
@@ -213,7 +226,6 @@ export const usePillJelly = (
         const scaleYCorrection = clamp(velocity * 0.25, -0.2, 0.2);
 
         return {
-            width: tabWidth,
             transform: [
                 { translateX: value.value * tabWidth },
                 { scaleX: baseScaleX.value / (1 - scaleXCorrection) },
@@ -233,6 +245,12 @@ export const usePillJelly = (
     // native mask element uses — while pillContentStyle applies the exact
     // inverse transform so the clipped content stays fixed to the track.
     const pillClipStyle = useAnimatedStyle(() => {
+        // Only the clip-box platforms mount this style. Everywhere else the
+        // worklet still ran once per frame and threw the result away.
+        if (!USES_CLIP_BOX) {
+            return {};
+        }
+
         const tabWidth = getTabWidth(trackWidth.value, trackInset, tabCount);
         const velocity = filteredVelocity.value / 10;
         const scaleXCorrection = clamp(velocity * 0.75, -0.2, 0.2);
@@ -248,6 +266,10 @@ export const usePillJelly = (
     });
 
     const pillContentStyle = useAnimatedStyle(() => {
+        if (!USES_CLIP_BOX) {
+            return {};
+        }
+
         const tabWidth = getTabWidth(trackWidth.value, trackInset, tabCount);
         const velocity = filteredVelocity.value / 10;
         const scaleXCorrection = clamp(velocity * 0.75, -0.2, 0.2);
@@ -540,6 +562,7 @@ export const usePillJelly = (
         setTrackWidth,
         setWebTrackPageX,
         tabbarStyle,
+        tabbarTransformOrigin,
         touchFeedbackStyle,
     };
 };

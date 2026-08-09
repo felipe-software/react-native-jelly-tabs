@@ -25,7 +25,9 @@ export interface PillLayerProps {
     touchFeedback?: TouchFeedbackVisuals;
     touchFeedbackStyle: AnimatedViewStyle;
     visible: boolean;
-    webTrackWidth: number;
+    // Sized from the measured track rather than from the animated worklet: a
+    // width inside an animated style costs a shadow-tree commit per frame.
+    measuredTrackWidth: number;
 }
 
 export const PillLayer = ({
@@ -42,7 +44,7 @@ export const PillLayer = ({
     touchFeedback,
     touchFeedbackStyle,
     visible,
-    webTrackWidth,
+    measuredTrackWidth,
 }: PillLayerProps) => {
     const { itemHeight, maskOverscanX, maskOverscanY, trackHeight, trackInset } =
         geometry;
@@ -67,10 +69,10 @@ export const PillLayer = ({
                 clipStyle={clipStyle}
                 contentHeight={trackHeight + maskOverscanY * 2}
                 contentStyle={contentStyle}
-                contentWidth={webTrackWidth + maskOverscanX * 2}
+                contentWidth={measuredTrackWidth + maskOverscanX * 2}
                 height={itemHeight}
                 left={contentLeft}
-                tabWidth={getTabWidth(webTrackWidth, trackInset, tabCount)}
+                tabWidth={getTabWidth(measuredTrackWidth, trackInset, tabCount)}
                 top={contentTop}
             >
                 <View style={StyleSheet.absoluteFill}>

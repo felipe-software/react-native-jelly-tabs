@@ -1,5 +1,6 @@
 import type { TabBarConfig } from "../constants";
 import { getPointerOrigin, rubberBand } from "../utils/animation";
+import { useMemo } from "react";
 import {
     cancelAnimation,
     clamp,
@@ -106,12 +107,24 @@ export const useDistortion = (
     // Reanimated Web does not reliably commit animated transformOrigin
     // updates. A centered CSS origin plus paired translations produces the
     // same moving pivot and works consistently on every platform.
+    //
+    // `transformOrigin` is constant, so it lives in a plain style instead of the
+    // worklet: on Fabric, a style object that carries anything other than
+    // transform/opacity takes Reanimated's commit path (clone the shadow tree,
+    // diff, mount) rather than writing straight to the view on the UI thread.
+    // Returning a constant from the worklet paid that price on every frame.
+    const tabbarTransformOrigin = useMemo(
+        () => ({
+            transformOrigin: ["50%", trackHeight / 2, 0] as [
+                string,
+                number,
+                number,
+            ],
+        }),
+        [trackHeight],
+    );
+
     const tabbarStyle = useAnimatedStyle(() => ({
-        transformOrigin: ["50%", trackHeight / 2, 0] as [
-            string,
-            number,
-            number,
-        ],
         transform: [
             {
                 translateX: transformOriginX.value - trackWidth.value / 2,
@@ -144,8 +157,12 @@ export const useDistortion = (
         };
     };
 
+    // One animated style drives both glows. They were two `useAnimatedStyle`
+    // calls over the *same* worklet, so the identical maths ran twice per frame
+    // and produced two prop updates; Reanimated is happy to attach a single
+    // style to several views.
     const touchFeedbackStyle = useAnimatedStyle(getTouchFeedbackStyle);
-    const selectedTouchFeedbackStyle = useAnimatedStyle(getTouchFeedbackStyle);
+    const selectedTouchFeedbackStyle = touchFeedbackStyle;
 
     return {
         begin,
@@ -154,6 +171,7 @@ export const useDistortion = (
         selectedTouchFeedbackStyle,
         setTrackWidth,
         tabbarStyle,
+        tabbarTransformOrigin,
         touchFeedbackStyle,
         update,
     };
