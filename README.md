@@ -10,6 +10,8 @@ A jelly-like animated tab bar for React Native, built with Reanimated, Gesture H
 
 Demo at: https://jelly.felipe.software/
 
+Docs at: https://jelly-docs.felipe.software
+
 > Still under development. Supports Android, iOS and React Native Web.
 
 ## Features
@@ -125,7 +127,7 @@ Colors, opacity, layout, jelly springs, distortion, backdrops, badges and the to
 
 ## Documentation
 
-**https://jelly.felipe.software/docs** — guides and live, interactive previews. Every
+**https://jelly-docs.felipe.software** — guides and live, interactive previews. Every
 example is a real Storybook story rendered through React Native Web, so what you read is
 what runs, and each preview has a **Copy props** button that hands you the current setup
 as JSX or as a plain config object.
