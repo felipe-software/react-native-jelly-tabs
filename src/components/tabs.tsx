@@ -1,31 +1,27 @@
+import {
+    AccessibilityTabsRow,
+    InactiveTabsRow,
+    PillLayer,
+    SurfaceLayer,
+    type TabBarGeometry,
+    TouchFeedbackLayer,
+    type TouchFeedbackVisuals,
+} from "./tab-bar-layers";
 import { TabItem } from "./tab-item";
 import {
     DEFAULT_TAB_BAR_COLORS,
     DEFAULT_TAB_BAR_OPACITY,
     resolveTabBarConfig,
+    type TabBarConfig,
 } from "../constants";
 import type { JellyTabBarHeadlessProps } from "../types";
-import { getTabWidth } from "../utils/animation";
 import { usePillJelly } from "../hooks/use-pill-jelly";
-import { PillMaskedView } from "./pill-masked-view";
-import { TouchFeedback } from "./touch-feedback";
-import {
-    cloneElement,
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Dimensions, Platform, StyleSheet, View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 
-const ACTIVATE_ACCESSIBILITY_ACTION = [{ name: "activate" }] as const;
-const TAB_ACCESSIBILITY_ACTIONS = [
-    { name: "activate" },
-    { name: "longpress" },
-] as const;
+const clamp01 = (value: number) => Math.min(Math.max(value, 0), 1);
 
 const getSelectedItemIndex = (
     selectedIndex: number | null,
@@ -41,6 +37,37 @@ const getSelectedItemIndex = (
     }
 
     return Math.min(selectedIndex, itemCount - 1);
+};
+
+const getGeometry = (
+    layout: TabBarConfig["layout"],
+    displayScale: number,
+): TabBarGeometry => ({
+    itemHeight: layout.itemHeight * displayScale,
+    maskOverscanX: layout.maskOverscanX * displayScale,
+    maskOverscanY: layout.maskOverscanY * displayScale,
+    trackHeight: layout.trackHeight * displayScale,
+    trackInset: layout.trackInset * displayScale,
+});
+
+const getTouchFeedbackVisuals = (
+    config: TabBarConfig["distortion"]["touchFeedback"],
+    displayScale: number,
+    overrides: { color: string; opacity?: number; scale?: number },
+): TouchFeedbackVisuals => {
+    const centerOpacity = clamp01(overrides.opacity ?? config.opacity);
+    const radius =
+        config.radius *
+        Math.max(overrides.scale ?? config.scale, 0) *
+        displayScale;
+
+    return {
+        centerOpacity,
+        color: overrides.color,
+        diameter: radius * 2,
+        middleOpacity: centerOpacity * config.middleOpacityRatio,
+        radius,
+    };
 };
 
 export const JellyTabBarHeadless = ({
@@ -77,45 +104,17 @@ export const JellyTabBarHeadless = ({
         ...DEFAULT_TAB_BAR_OPACITY,
         ...opacity,
     };
-    const normalizeOpacity = (value: number) => Math.min(Math.max(value, 0), 1);
-    const activeContentOpacity = normalizeOpacity(
-        resolvedOpacity.activeContent,
-    );
-    const inactiveContentOpacity = normalizeOpacity(
-        resolvedOpacity.inactiveContent,
-    );
-    const selectedSurfaceOpacity = normalizeOpacity(
-        resolvedOpacity.selectedSurface,
-    );
-    const surfaceOpacity = normalizeOpacity(resolvedOpacity.surface);
-    const resolvedTouchFeedbackOpacity =
-        touchFeedbackOpacity ?? resolvedConfig.distortion.touchFeedback.opacity;
-    const resolvedTouchFeedbackScale =
-        touchFeedbackScale ?? resolvedConfig.distortion.touchFeedback.scale;
-    const resolvedTouchFeedbackColor =
-        touchFeedbackColor ?? resolvedColors.selectedSurface;
-    const maskOverscanX = resolvedConfig.layout.maskOverscanX * displayScale;
-    const maskOverscanY = resolvedConfig.layout.maskOverscanY * displayScale;
-    const trackInset = resolvedConfig.layout.trackInset * displayScale;
-    const trackHeight = resolvedConfig.layout.trackHeight * displayScale;
-    const itemHeight = resolvedConfig.layout.itemHeight * displayScale;
+    const geometry = getGeometry(resolvedConfig.layout, displayScale);
     const iconSize = resolvedConfig.layout.iconSize * displayScale;
-    const normalizedTouchFeedbackOpacity = Math.min(
-        Math.max(resolvedTouchFeedbackOpacity, 0),
-        1,
+    const touchFeedback = getTouchFeedbackVisuals(
+        resolvedConfig.distortion.touchFeedback,
+        displayScale,
+        {
+            color: touchFeedbackColor ?? resolvedColors.selectedSurface,
+            opacity: touchFeedbackOpacity,
+            scale: touchFeedbackScale,
+        },
     );
-    const normalizedTouchFeedbackScale = Math.max(
-        resolvedTouchFeedbackScale,
-        0,
-    );
-    const touchFeedbackRadius =
-        resolvedConfig.distortion.touchFeedback.radius *
-        normalizedTouchFeedbackScale *
-        displayScale;
-    const touchFeedbackDiameter = touchFeedbackRadius * 2;
-    const touchFeedbackMiddleOpacity =
-        normalizedTouchFeedbackOpacity *
-        resolvedConfig.distortion.touchFeedback.middleOpacityRatio;
 
     const handleTabChange = useCallback(
         (index: number) => {
@@ -152,7 +151,7 @@ export const JellyTabBarHeadless = ({
         <TabItem
             activeBadgeStyle={item.activeBadgeStyle}
             activeColor={resolvedColors.activeContent}
-            activeOpacity={activeContentOpacity}
+            activeOpacity={clamp01(resolvedOpacity.activeContent)}
             activeIcon={item.activeIcon}
             badge={item.badge}
             badgeStyle={item.badgeStyle}
@@ -161,8 +160,8 @@ export const JellyTabBarHeadless = ({
             iconSize={iconSize}
             inactiveIcon={item.inactiveIcon}
             inactiveColor={resolvedColors.inactiveContent}
-            inactiveOpacity={inactiveContentOpacity}
-            itemHeight={itemHeight}
+            inactiveOpacity={clamp01(resolvedOpacity.inactiveContent)}
+            itemHeight={geometry.itemHeight}
             key={item.key}
             labelStyle={item.labelStyle}
             text={item.label}
@@ -173,7 +172,6 @@ export const JellyTabBarHeadless = ({
         selectedIndex === undefined ? uncontrolledSelectedIndex : selectedIndex,
         tabCount,
     );
-    const hasSelectedItem = semanticSelectedIndex !== null;
     const {
         activateTab,
         activeItemStyle,
@@ -193,7 +191,7 @@ export const JellyTabBarHeadless = ({
         resolvedConfig,
         recording,
         displayScale,
-        touchFeedbackRadius,
+        touchFeedback.radius,
         selectedIndex,
         handleTabChange,
         onTabPress ? handleTabPress : undefined,
@@ -224,7 +222,7 @@ export const JellyTabBarHeadless = ({
                 collapsable={false}
                 style={[
                     styles.pressWrapper,
-                    { height: trackHeight, maxWidth },
+                    { height: geometry.trackHeight, maxWidth },
                     pressedStyle,
                 ]}
             >
@@ -233,7 +231,11 @@ export const JellyTabBarHeadless = ({
                     pointerEvents="box-only"
                     ref={trackRef}
                     testID="tabs-drag-surface"
-                    style={[styles.track, { height: trackHeight }, tabbarStyle]}
+                    style={[
+                        styles.track,
+                        { height: geometry.trackHeight },
+                        tabbarStyle,
+                    ]}
                     onLayout={(event) => {
                         setTrackWidth(event.nativeEvent.layout.width);
                         if (Platform.OS === "web") {
@@ -247,190 +249,59 @@ export const JellyTabBarHeadless = ({
                         aria-hidden
                         importantForAccessibility="no-hide-descendants"
                         pointerEvents="none"
-                        style={[styles.panel, panelStyle]}
+                        style={[StyleSheet.absoluteFill, panelStyle]}
                     >
-                        <View
-                            style={[
-                                styles.surfaceClip,
-                                {
-                                    borderRadius: trackHeight / 2,
-                                },
-                            ]}
-                        >
-                            {backdrop}
-                            <View
-                                style={[
-                                    styles.surface,
-                                    {
-                                        backgroundColor: resolvedColors.surface,
-                                        opacity: surfaceOpacity,
-                                    },
-                                ]}
-                            />
-                        </View>
+                        <SurfaceLayer
+                            backdrop={backdrop}
+                            color={resolvedColors.surface}
+                            opacity={clamp01(resolvedOpacity.surface)}
+                            radius={geometry.trackHeight / 2}
+                        />
 
                         {touchFeedbackEnabled && (
-                            <View
-                                style={[
-                                    styles.touchFeedbackClip,
-                                    { borderRadius: trackHeight / 2 },
-                                ]}
-                            >
-                                <TouchFeedback
-                                    animatedStyle={touchFeedbackStyle}
-                                    centerOpacity={
-                                        normalizedTouchFeedbackOpacity
-                                    }
-                                    color={resolvedTouchFeedbackColor}
-                                    diameter={touchFeedbackDiameter}
-                                    gradientId="tabbar-touch-feedback"
-                                    middleOpacity={touchFeedbackMiddleOpacity}
-                                    radius={touchFeedbackRadius}
-                                />
-                            </View>
+                            <TouchFeedbackLayer
+                                animatedStyle={touchFeedbackStyle}
+                                radius={geometry.trackHeight / 2}
+                                visuals={touchFeedback}
+                            />
                         )}
 
-                        <View
-                            style={[
-                                styles.tabsRow,
-                                { paddingHorizontal: trackInset },
-                            ]}
-                        >
-                            {tabs.map((tab, index) =>
-                                cloneElement(tab, {
-                                    key: `inactive-${index}`,
-                                }),
-                            )}
-                        </View>
+                        <InactiveTabsRow
+                            tabs={tabs}
+                            trackInset={geometry.trackInset}
+                        />
 
-                        <View
-                            style={[
-                                styles.maskOverscan,
-                                {
-                                    bottom: -maskOverscanY,
-                                    left: -maskOverscanX,
-                                    right: -maskOverscanX,
-                                    top: -maskOverscanY,
-                                },
-                                !hasSelectedItem && styles.hidden,
-                            ]}
-                        >
-                            <PillMaskedView
-                                animatedStyle={pillMaskStyle}
-                                clipStyle={pillClipStyle}
-                                contentHeight={
-                                    trackHeight + maskOverscanY * 2
-                                }
-                                contentStyle={pillContentStyle}
-                                contentWidth={
-                                    webTrackWidth + maskOverscanX * 2
-                                }
-                                height={itemHeight}
-                                left={maskOverscanX + trackInset}
-                                tabWidth={getTabWidth(
-                                    webTrackWidth,
-                                    trackInset,
-                                    tabCount,
-                                )}
-                                top={maskOverscanY + trackInset}
-                            >
-                                <View style={styles.selectedSurface}>
-                                    {selectedBackdrop}
-                                    <View
-                                        style={[
-                                            StyleSheet.absoluteFill,
-                                            {
-                                                backgroundColor:
-                                                    resolvedColors.selectedSurface,
-                                                opacity: selectedSurfaceOpacity,
-                                            },
-                                        ]}
-                                    />
-                                </View>
-                                {touchFeedbackEnabled && (
-                                    <TouchFeedback
-                                        animatedStyle={
-                                            selectedTouchFeedbackStyle
-                                        }
-                                        centerOpacity={
-                                            normalizedTouchFeedbackOpacity
-                                        }
-                                        color={resolvedTouchFeedbackColor}
-                                        diameter={touchFeedbackDiameter}
-                                        gradientId="selected-tab-touch-feedback"
-                                        middleOpacity={
-                                            touchFeedbackMiddleOpacity
-                                        }
-                                        offsetX={maskOverscanX}
-                                        offsetY={maskOverscanY}
-                                        radius={touchFeedbackRadius}
-                                    />
-                                )}
-                                <View
-                                    style={[
-                                        styles.selectedTabsRow,
-                                        {
-                                            height: itemHeight,
-                                            left: maskOverscanX + trackInset,
-                                            right: maskOverscanX + trackInset,
-                                            top: maskOverscanY + trackInset,
-                                        },
-                                    ]}
-                                >
-                                    {tabs.map((tab, index) =>
-                                        cloneElement(tab, {
-                                            animatedStyle: activeItemStyle,
-                                            isActive: true,
-                                            key: `active-${index}`,
-                                        }),
-                                    )}
-                                </View>
-                            </PillMaskedView>
-                        </View>
+                        <PillLayer
+                            activeItemStyle={activeItemStyle}
+                            clipStyle={pillClipStyle}
+                            contentStyle={pillContentStyle}
+                            geometry={geometry}
+                            maskStyle={pillMaskStyle}
+                            selectedBackdrop={selectedBackdrop}
+                            selectedSurfaceColor={resolvedColors.selectedSurface}
+                            selectedSurfaceOpacity={clamp01(
+                                resolvedOpacity.selectedSurface,
+                            )}
+                            tabCount={tabCount}
+                            tabs={tabs}
+                            touchFeedback={
+                                touchFeedbackEnabled ? touchFeedback : undefined
+                            }
+                            touchFeedbackStyle={selectedTouchFeedbackStyle}
+                            visible={semanticSelectedIndex !== null}
+                            webTrackWidth={webTrackWidth}
+                        />
                     </Animated.View>
 
-                    <View
-                        pointerEvents="box-none"
-                        style={[
-                            styles.accessibilityTabsRow,
-                            { paddingHorizontal: trackInset },
-                        ]}
-                    >
-                        {items.map((item, index) => (
-                            <View
-                                accessibilityActions={
-                                    onTabLongPress
-                                        ? TAB_ACCESSIBILITY_ACTIONS
-                                        : ACTIVATE_ACCESSIBILITY_ACTION
-                                }
-                                accessibilityLabel={
-                                    item.accessibilityLabel ?? item.label
-                                }
-                                accessibilityRole="tab"
-                                accessibilityState={{
-                                    selected: semanticSelectedIndex === index,
-                                }}
-                                accessible
-                                key={`accessible-${item.key}`}
-                                pointerEvents="none"
-                                style={styles.accessibilityTab}
-                                testID={item.testID}
-                                onAccessibilityAction={(event) => {
-                                    if (
-                                        event.nativeEvent.actionName ===
-                                        "activate"
-                                    ) {
-                                        activateTab(index);
-                                    } else if (
-                                        event.nativeEvent.actionName ===
-                                        "longpress"
-                                    ) {
-                                        handleTabLongPress(index);
-                                    }
-                                }}
-                            />
-                        ))}
-                    </View>
+                    <AccessibilityTabsRow
+                        items={items}
+                        onActivate={activateTab}
+                        onLongPress={
+                            onTabLongPress ? handleTabLongPress : undefined
+                        }
+                        selectedIndex={semanticSelectedIndex}
+                        trackInset={geometry.trackInset}
+                    />
                 </Animated.View>
             </Animated.View>
         </GestureDetector>
@@ -451,76 +322,5 @@ const styles = StyleSheet.create({
         position: "relative",
         width: "100%",
         overflow: "visible",
-    },
-    panel: {
-        position: "absolute",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        top: 0,
-    },
-    surface: {
-        position: "absolute",
-        left: 0,
-        right: 0,
-        top: 0,
-        bottom: 0,
-    },
-    surfaceClip: {
-        bottom: 0,
-        left: 0,
-        position: "absolute",
-        right: 0,
-        top: 0,
-        overflow: "hidden",
-    },
-    touchFeedbackClip: {
-        position: "absolute",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        top: 0,
-        overflow: "hidden",
-    },
-    tabsRow: {
-        position: "absolute",
-        left: 0,
-        right: 0,
-        top: 0,
-        bottom: 0,
-        flexDirection: "row",
-        alignItems: "center",
-    },
-    accessibilityTabsRow: {
-        bottom: 0,
-        flexDirection: "row",
-        left: 0,
-        position: "absolute",
-        right: 0,
-        top: 0,
-        zIndex: 3,
-    },
-    accessibilityTab: {
-        flex: 1,
-    },
-    maskOverscan: {
-        position: "absolute",
-        zIndex: 2,
-    },
-    hidden: {
-        display: "none",
-    },
-    selectedSurface: {
-        position: "absolute",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        top: 0,
-    },
-    selectedTabsRow: {
-        position: "absolute",
-        flexDirection: "row",
-        alignItems: "center",
-        zIndex: 1,
     },
 });
