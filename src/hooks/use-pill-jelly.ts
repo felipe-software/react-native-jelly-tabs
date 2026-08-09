@@ -9,12 +9,14 @@ import {
     advancePillJellyFrame,
     type PillJellyFrameState,
 } from "../utils/pill-jelly-animation";
+import { getLocalCoordinate } from "./use-web-origin";
 import { Gesture } from "react-native-gesture-handler";
 import { Platform } from "react-native";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
     clamp,
     runOnJS,
+    type SharedValue,
     useAnimatedStyle,
     useDerivedValue,
     useFrameCallback,
@@ -34,17 +36,32 @@ const getControlledSelectedIndex = (
     return Math.min(selectedIndex, getMaxTabIndex(tabCount));
 };
 
-export const usePillJelly = (
-    tabCount: number,
-    config: TabBarConfig,
-    recording = false,
+export interface UsePillJellyOptions {
+    config: TabBarConfig;
+    controlledSelectedIndex?: number | null;
+    displayScale?: number;
+    onTabChange?: (index: number) => void;
+    onTabLongPress?: (index: number) => void;
+    onTabPress?: (index: number) => boolean | void;
+    recording?: boolean;
+    tabCount: number;
+    touchFeedbackRadius?: number;
+    /** Window position of the track, measured by `useWebOrigin`. */
+    webTrackPageX: SharedValue<number>;
+}
+
+export const usePillJelly = ({
+    config,
+    controlledSelectedIndex,
     displayScale = 1,
+    onTabChange,
+    onTabLongPress,
+    onTabPress,
+    recording = false,
+    tabCount,
     touchFeedbackRadius = 0,
-    controlledSelectedIndex?: number | null,
-    onTabChange?: (index: number) => void,
-    onTabPress?: (index: number) => boolean | void,
-    onTabLongPress?: (index: number) => void,
-) => {
+    webTrackPageX,
+}: UsePillJellyOptions) => {
     const geometryScale = displayScale > 0 ? displayScale : 1;
     const { layout, pillJelly } = config;
     const itemHeight = layout.itemHeight * geometryScale;
@@ -94,7 +111,6 @@ export const usePillJelly = (
     const isDragging = useSharedValue(0);
     const releasePending = useSharedValue(0);
     const downX = useSharedValue(0);
-    const webTrackPageX = useSharedValue(Number.NaN);
     const movedDistance = useSharedValue(0);
     const dragStartTarget = useSharedValue(0);
     const dragStartPanelOffset = useSharedValue(0);
@@ -426,13 +442,14 @@ export const usePillJelly = (
                 return;
             }
 
-            // RNGH Web can report x relative to its display: contents
-            // wrapper. Derive it from the measured track instead.
             const localX = recording
                 ? firstTouch.y
-                : IS_WEB && Number.isFinite(webTrackPageX.value)
-                  ? firstTouch.absoluteX - webTrackPageX.value
-                  : firstTouch.x;
+                : getLocalCoordinate(
+                      firstTouch.absoluteX,
+                      firstTouch.x,
+                      webTrackPageX.value,
+                      IS_WEB,
+                  );
             const localY = recording ? trackHeight / 2 : firstTouch.y;
             const absoluteX = recording
                 ? firstTouch.absoluteY
@@ -518,15 +535,6 @@ export const usePillJelly = (
         setDistortionTrackWidth(width);
     };
 
-    const setWebTrackPageX = useCallback(
-        (pageX: number) => {
-            if (IS_WEB && Number.isFinite(pageX)) {
-                webTrackPageX.value = pageX;
-            }
-        },
-        [webTrackPageX],
-    );
-
     return {
         activateTab,
         activeItemStyle,
@@ -538,7 +546,6 @@ export const usePillJelly = (
         pressedStyle,
         selectedTouchFeedbackStyle,
         setTrackWidth,
-        setWebTrackPageX,
         tabbarStyle,
         touchFeedbackStyle,
     };

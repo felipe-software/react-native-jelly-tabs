@@ -7,17 +7,11 @@ import {
 import type { JellyTabBarHeadlessProps } from "../types";
 import { getTabWidth } from "../utils/animation";
 import { usePillJelly } from "../hooks/use-pill-jelly";
+import { useWebOrigin } from "../hooks/use-web-origin";
 import { PillMaskedView } from "./pill-masked-view";
 import { TouchFeedback } from "./touch-feedback";
-import {
-    cloneElement,
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
-import { Dimensions, Platform, StyleSheet, View } from "react-native";
+import { cloneElement, useCallback, useMemo, useState } from "react";
+import { Platform, StyleSheet, View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 
@@ -62,7 +56,7 @@ export const JellyTabBarHeadless = ({
     touchFeedbackOpacity,
     touchFeedbackScale,
 }: JellyTabBarHeadlessProps) => {
-    const trackRef = useRef<View>(null);
+    const trackOrigin = useWebOrigin();
     const [uncontrolledSelectedIndex, setUncontrolledSelectedIndex] =
         useState(0);
     // Web only: the pill clip box is statically sized from the measured track
@@ -185,38 +179,20 @@ export const JellyTabBarHeadless = ({
         pressedStyle,
         selectedTouchFeedbackStyle,
         setTrackWidth,
-        setWebTrackPageX,
         tabbarStyle,
         touchFeedbackStyle,
-    } = usePillJelly(
-        tabCount,
-        resolvedConfig,
-        recording,
+    } = usePillJelly({
+        config: resolvedConfig,
+        controlledSelectedIndex: selectedIndex,
         displayScale,
+        onTabChange: handleTabChange,
+        onTabLongPress: onTabLongPress ? handleTabLongPress : undefined,
+        onTabPress: onTabPress ? handleTabPress : undefined,
+        recording,
+        tabCount,
         touchFeedbackRadius,
-        selectedIndex,
-        handleTabChange,
-        onTabPress ? handleTabPress : undefined,
-        onTabLongPress ? handleTabLongPress : undefined,
-    );
-    const measureWebTrackPageX = useCallback(() => {
-        trackRef.current?.measureInWindow((x) => setWebTrackPageX(x));
-    }, [setWebTrackPageX]);
-
-    useEffect(() => {
-        if (Platform.OS !== "web") {
-            return;
-        }
-
-        // A centered track can move when the viewport is resized without
-        // changing its own width, so onLayout alone will not run again.
-        const subscription = Dimensions.addEventListener(
-            "change",
-            measureWebTrackPageX,
-        );
-
-        return () => subscription.remove();
-    }, [measureWebTrackPageX]);
+        webTrackPageX: trackOrigin.pageX,
+    });
 
     return (
         <GestureDetector gesture={gesture}>
@@ -231,14 +207,14 @@ export const JellyTabBarHeadless = ({
                 <Animated.View
                     collapsable={false}
                     pointerEvents="box-only"
-                    ref={trackRef}
+                    ref={trackOrigin.ref}
                     testID="tabs-drag-surface"
                     style={[styles.track, { height: trackHeight }, tabbarStyle]}
                     onLayout={(event) => {
                         setTrackWidth(event.nativeEvent.layout.width);
                         if (Platform.OS === "web") {
                             setWebTrackWidth(event.nativeEvent.layout.width);
-                            measureWebTrackPageX();
+                            trackOrigin.measure();
                         }
                     }}
                 >

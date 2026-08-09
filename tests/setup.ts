@@ -55,7 +55,11 @@ const flattenStyle = (style: unknown): unknown => {
 };
 
 const MockAnimatedView = forwardRef<
-    { measureInWindow: (callback: (x: number) => void) => void },
+    {
+        measureInWindow: (
+            callback: (x: number, y: number) => void,
+        ) => void;
+    },
     Record<string, unknown>
 >((props, ref) => {
     useImperativeHandle(ref, () => ({
@@ -65,9 +69,11 @@ const MockAnimatedView = forwardRef<
     return createElement("Animated.View", props);
 });
 
-export const measureInWindow = mock((callback: (x: number) => void) => {
-    callback(24);
-});
+export const measureInWindow = mock(
+    (callback: (x: number, y: number) => void) => {
+        callback(24, 12);
+    },
+);
 
 type DimensionsChangeListener = () => void;
 const dimensionsChangeListeners = new Set<DimensionsChangeListener>();

@@ -163,3 +163,58 @@ Springs are `{ stiffness, dampingRatio }` per channel:
 
 The touch-feedback gradient is drawn twice — once under the whole track and once
 inside the pill mask — so it stays visible as it crosses the selected tab.
+
+## `<JellyPressable />`
+
+A standalone elastic button: press scale, focus glow and stretchy drag, with no
+tab bar attached. It shares hooks with `JellyTabBar` but none of its config.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | — | Rendered above the glow layer. |
+| `onPress` | `() => void` | — | On release, when the gesture travelled less than 8px and no long press fired. |
+| `onLongPress` | `() => void` | — | After a 500ms hold; suppresses the following `onPress`. |
+| `disabled` | `boolean` | `false` | Disables the gesture and sets `accessibilityState.disabled`. |
+| `style` | `StyleProp<ViewStyle>` | — | Styles the surface itself. |
+| `borderRadius` | `number` | from `style` | Radius used to clip the glow. |
+| `config` | `DeepPartial<GelatinConfig>` | see below | Motion overrides. |
+| `touchFeedbackEnabled` | `boolean` | `true` | Toggles the glow. |
+| `touchFeedbackColor` | `string` | `"#ffffff"` | Glow color. |
+| `touchFeedbackOpacity` | `number` | `0.35` | Center-stop opacity, clamped `0`–`1`. |
+| `touchFeedbackScale` | `number` | `1` | Multiplier applied to the glow radius. |
+| `accessibilityRole` | `AccessibilityRole` | `"button"` | |
+| `accessibilityLabel` / `accessibilityHint` | `string` | — | |
+| `accessibilityState` | `AccessibilityState` | — | Merged over the automatic `disabled` state. |
+| `testID` | `string` | — | |
+
+It exposes `activate` — and `longpress` when `onLongPress` is set — as
+accessibility actions.
+
+### `GelatinConfig`
+
+Deep-partial; `resolveGelatinConfig(partial?)` returns the full object.
+
+| Key | Default | Description |
+| --- | --- | --- |
+| `pressedScale` | `1.1` | Whole-surface scale while pressed. |
+| `drag.easingExponent` | `0.333` | Exponent applied to the raw drag distance. |
+| `drag.follow` | `2` | Scales the eased offset; does not change the stretch. |
+| `drag.maxStretch` | `0.9` | Stretch at full deformation, before amplification. |
+| `drag.stretchAmplification` | `3` | Multiplier on `maxStretch`. |
+| `drag.distanceForMaxStretch` | `32` | Eased distance (px) reaching the full stretch. |
+| `drag.stretchAnchor` | `1` | How far the transform origin slides to the trailing edge, so the surface grows towards the finger. `0` scales about the centre. |
+| `springs.drag` | `{ duration: 390, dampingRatio: 1 }` | Chases the finger during the drag. |
+| `springs.press` | `{ duration: 300, dampingRatio: 0.5 }` | Press inflation and glow fade. |
+| `springs.release` | `{ duration: 500, dampingRatio: 0.5 }` | Bounce back on release. |
+| `touchFeedback.opacity` | `0.35` | Base opacity of the radial gradient. |
+| `touchFeedback.middleOpacityRatio` | `0.43` | Opacity of the `45%` stop, relative to the base. |
+| `touchFeedback.radius` | `90` | Base gradient radius (px). |
+| `touchFeedback.scale` | `1` | Multiplier applied to the radius. |
+
+### Gelatin hooks
+
+`useGelatin(config, touchFeedbackRadius?)` and
+`useTouchGlow(spring, radius?)` expose the effect without the component, for
+custom surfaces and gestures. The pure worklets `applyElasticEasing`,
+`getStretchFactor`, `getStretchOrigin` and `getGelatinTransform` are exported
+too.

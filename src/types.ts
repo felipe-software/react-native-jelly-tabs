@@ -1,16 +1,45 @@
 import type {
     DeepPartial,
+    GelatinConfig,
     TabBarColors,
     TabBarConfig,
     TabBarOpacity,
 } from "./constants";
 import type { ComponentType, ReactNode } from "react";
 import type {
+    AccessibilityRole,
+    AccessibilityState,
     DimensionValue,
     StyleProp,
     TextStyle,
     ViewStyle,
 } from "react-native";
+
+export interface JellyPressableProps {
+    accessibilityHint?: string;
+    accessibilityLabel?: string;
+    /** Defaults to `"button"`. */
+    accessibilityRole?: AccessibilityRole;
+    accessibilityState?: AccessibilityState;
+    /**
+     * Radius used to clip the touch-feedback glow. Falls back to the
+     * `borderRadius` found on `style`, then to `0`.
+     */
+    borderRadius?: number;
+    children?: ReactNode;
+    config?: DeepPartial<GelatinConfig>;
+    disabled?: boolean;
+    onLongPress?: () => void;
+    onPress?: () => void;
+    /** Styles the pressable surface itself — background, padding, radius. */
+    style?: StyleProp<ViewStyle>;
+    testID?: string;
+    /** Defaults to the same white the tab bar uses. */
+    touchFeedbackColor?: string;
+    touchFeedbackEnabled?: boolean;
+    touchFeedbackOpacity?: number;
+    touchFeedbackScale?: number;
+}
 
 export interface TabsIconProps {
     color: string;

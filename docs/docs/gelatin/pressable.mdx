@@ -1,0 +1,186 @@
+---
+sidebar_position: 1
+title: JellyPressable
+---
+
+# JellyPressable
+
+An elastic button. Press it and it inflates while a radial glow lights up
+exactly where your finger landed; drag it and it stretches toward the finger,
+then bounces back when you let go.
+
+It ships in the same package as the tab bar but is **completely standalone** —
+it shares hooks with `JellyTabBar`, not layout or configuration. Use it on its
+own, anywhere.
+
+<StorybookPreview id="gelatin-pressable--default" height={380} />
+
+```tsx
+import { JellyPressable } from "react-native-jelly-tabs";
+
+<JellyPressable
+    accessibilityLabel="Send"
+    style={{ backgroundColor: "#F59E0B", borderRadius: 28, padding: 16 }}
+    onPress={() => send()}
+>
+    <Text>Send</Text>
+</JellyPressable>;
+```
+
+:::note
+`JellyPressable` uses Gesture Handler and Reanimated, so it has to live under a
+`<GestureHandlerRootView>` — the same requirement as the tab bar. See
+**[Installation](../installation)**.
+:::
+
+## The three effects
+
+Each one can be tuned or turned off independently.
+
+| Effect | What it does | Turn it off with |
+| --- | --- | --- |
+| **Press scale** | Inflates the whole surface while held. | `config.pressedScale: 1` |
+| **Focus glow** | A radial highlight that fades in under the pointer and tracks it. | `touchFeedbackEnabled={false}` |
+| **Stretchy drag** | Elastic offset + per-axis stretch that follows the finger. | `config.drag: { follow: 0, maxStretch: 0 }` |
+
+Keep the press and the glow, drop the stretch:
+
+<StorybookPreview id="gelatin-pressable--scale-only" height={340} />
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | — | Rendered above the glow layer. |
+| `onPress` | `() => void` | — | Fires on release when the gesture never travelled more than 8px and no long press fired. |
+| `onLongPress` | `() => void` | — | Fires after a 500ms hold. Suppresses the following `onPress`. |
+| `disabled` | `boolean` | `false` | Disables the gesture and sets `accessibilityState.disabled`. |
+| `style` | `StyleProp<ViewStyle>` | — | Styles the surface itself — background, padding, radius. |
+| `borderRadius` | `number` | from `style` | Radius used to clip the glow. |
+| `config` | `DeepPartial<GelatinConfig>` | see below | Motion overrides. |
+| `touchFeedbackEnabled` | `boolean` | `true` | Toggles the glow. |
+| `touchFeedbackColor` | `string` | `"#ffffff"` | Glow color. |
+| `touchFeedbackOpacity` | `number` | `0.35` | Opacity of the gradient's center stop, clamped `0`–`1`. |
+| `touchFeedbackScale` | `number` | `1` | Multiplier applied to the glow radius. |
+| `accessibilityRole` | `AccessibilityRole` | `"button"` | |
+| `accessibilityLabel` / `accessibilityHint` | `string` | — | |
+| `accessibilityState` | `AccessibilityState` | — | Merged over the automatic `disabled` state. |
+| `testID` | `string` | — | |
+
+The component exposes `activate` (and `longpress`, when `onLongPress` is set) as
+accessibility actions, so screen readers can fire the handlers without a
+gesture.
+
+:::note
+The semantics sit on an inert layer inside the surface rather than on the
+surface itself — Gesture Handler skips web pointer capture whenever its own
+view carries `role="button"`, which would lose every release that lands outside
+the button. `testID` stays on the surface; `accessibilityRole` and friends land
+on the inner layer. The surface is also `pointerEvents="box-only"`, so nested
+interactive children are not supported.
+:::
+
+:::tip
+`onPress` is cancelled by a drag on purpose — dragging is a first-class
+interaction here, not a slip. Anything past 8px of travel is treated as a
+stretch, not a tap.
+:::
+
+## `config`
+
+Deep-partial, like the tab bar's. Anything you leave out keeps its default; call
+`resolveGelatinConfig(partial?)` if you want the full object.
+
+```tsx
+<JellyPressable
+    config={{
+        pressedScale: 1.2,
+        drag: { follow: 2, maxStretch: 1.2 },
+        springs: { release: { dampingRatio: 0.25, duration: 900 } },
+    }}
+/>
+```
+
+### `config.drag`
+
+The drag is flattened by a power curve before anything else, so the first pixels
+move the surface a lot and later ones barely at all. That eased distance then
+drives both the travel and the stretch.
+
+| Key | Default | Description |
+| --- | --- | --- |
+| `easingExponent` | `0.333` | Exponent applied to the raw drag distance. Lower is more gradual. |
+| `follow` | `2` | Scales the eased offset. Only moves the surface — the stretch is untouched. |
+| `maxStretch` | `0.9` | Stretch added at full deformation, before amplification. |
+| `stretchAmplification` | `3` | Multiplier on `maxStretch`. |
+| `distanceForMaxStretch` | `32` | Eased distance (px) that reaches the full stretch. |
+| `stretchAnchor` | `1` | How far the transform origin slides to the trailing edge. `0` scales about the centre. |
+
+Each axis deforms from its own translation: drag sideways and the surface gets
+wider, drag down and it gets taller. Everything inside deforms with it — the
+label and icons stretch along with the surface, because it is one transform.
+
+### The stretch goes where you pull
+
+Scaling about the centre pushes a surface out both ways, which reads as it
+inflating rather than being pulled. `stretchAnchor` slides the transform origin
+onto the **trailing** edge instead: pull left and the right edge stays put, so
+the whole deformation travels towards your finger.
+
+Unlike the stretch, the anchor ramps over the *raw* drag distance — direction
+has to read immediately, and the eased distance saturates far too slowly for
+that. Set `stretchAnchor: 0` for the old centred behaviour.
+
+<StorybookPreview id="gelatin-pressable--follows-the-finger" height={340} />
+<StorybookPreview id="gelatin-pressable--very-stretchy" height={340} />
+
+### `config.springs`
+
+Three duration-based springs, matching SwiftUI's
+`.smooth(duration:extraBounce:)`. `dampingRatio: 1` settles without overshoot;
+lower it for bounce.
+
+| Spring | `duration` | `dampingRatio` | Drives |
+| --- | --- | --- | --- |
+| `drag` | `390` | `1` | Chasing the finger during the drag. |
+| `press` | `300` | `0.5` | The press inflation and the glow fade. |
+| `release` | `500` | `0.5` | The bounce back once the finger lifts. |
+
+<StorybookPreview id="gelatin-pressable--wobbly" height={340} />
+<StorybookPreview id="gelatin-pressable--snappy" height={340} />
+
+### `config.pressedScale`
+
+`1.1` by default — the whole surface inflates while held, multiplied on top of
+the drag stretch.
+
+### `config.touchFeedback`
+
+The same gradient the tab bar uses, sized for a button.
+
+| Key | Default | Description |
+| --- | --- | --- |
+| `opacity` | `0.35` | Opacity of the gradient's center stop. |
+| `middleOpacityRatio` | `0.43` | Opacity of the `45%` stop, relative to `opacity`. |
+| `radius` | `90` | Base gradient radius (px). |
+| `scale` | `1` | Multiplier applied to the radius. |
+
+The `touchFeedback*` props override these per instance, which is usually what
+you want:
+
+<StorybookPreview id="gelatin-pressable--tinted-glow" height={340} />
+
+The glow is clipped to `borderRadius`, falling back to whatever `borderRadius`
+is on `style`. Give it one, or it will spill out of a rounded surface.
+
+## Playground
+
+Every dial at once:
+
+<StorybookPreview id="gelatin-playground--default" height={420} />
+
+## Credits
+
+The drag math is ported from [Gelatin](https://github.com/Polarizz/Gelatin), a
+SwiftUI package by Paul Wong, and rebuilt on Reanimated worklets so it runs on
+Android, iOS and Web.
