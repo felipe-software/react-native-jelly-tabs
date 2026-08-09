@@ -36,10 +36,7 @@ const host = {
     icon: "CustomizationIcon",
     maskedView: "MaskedView",
     navigationBackdrop: "NavigationBackdrop",
-    radialGradient: "RadialGradient",
-    rect: "Rect",
     selectedBackdrop: "SelectedBackdrop",
-    stop: "Stop",
     text: "Text",
     trackBackdrop: "TrackBackdrop",
     view: "View",
@@ -71,6 +68,34 @@ const flattenStyle = (style: unknown): Record<string, unknown> => {
         ? (style as Record<string, unknown>)
         : {};
 };
+
+/** The gradient string `TouchFeedback` builds for a `#rrggbb` colour. */
+const gradientFor = (
+    color: string,
+    centerOpacity: number,
+    middleOpacity: number,
+) => {
+    const rgb = [1, 3, 5]
+        .map((index) => parseInt(color.slice(index, index + 2), 16))
+        .join(", ");
+
+    return (
+        `radial-gradient(circle closest-side at center, ` +
+        `rgba(${rgb}, ${centerOpacity}) 0%, ` +
+        `rgba(${rgb}, ${middleOpacity}) 45%, ` +
+        `rgba(${rgb}, 0) 100%)`
+    );
+};
+
+/** Every glow box, as { size, gradient }, in render order. */
+const touchFeedbackBoxes = (renderer: RenderResult) =>
+    findAllByType(renderer, host.animatedView)
+        .map((node) => flattenStyle(node.props.style))
+        .filter((style) => style.experimental_backgroundImage !== undefined)
+        .map((style) => ({
+            size: style.width as number,
+            gradient: style.experimental_backgroundImage as string,
+        }));
 
 const findViewByBackgroundColor = (
     renderer: RenderResult,
@@ -444,29 +469,11 @@ describe("PROPS.md component contract", () => {
             />,
         );
 
-        expect(
-            findAllByType(renderer, host.radialGradient).map(
-                (gradient) => gradient.props.r,
-            ),
-        ).toEqual([30, 30]);
-        expect(
-            findAllByType(renderer, host.stop).map((stop) => ({
-                color: stop.props.stopColor,
-                opacity: stop.props.stopOpacity,
-            })),
-        ).toEqual([
-            { color: "#abcdef", opacity: 0.4 },
-            { color: "#abcdef", opacity: 0.1 },
-            { color: "#abcdef", opacity: 0 },
-            { color: "#abcdef", opacity: 0.4 },
-            { color: "#abcdef", opacity: 0.1 },
-            { color: "#abcdef", opacity: 0 },
+        // radius 10 * scale 3 = 30, so each glow is a 60x60 box.
+        expect(touchFeedbackBoxes(renderer)).toEqual([
+            { size: 60, gradient: gradientFor("#abcdef", 0.4, 0.1) },
+            { size: 60, gradient: gradientFor("#abcdef", 0.4, 0.1) },
         ]);
-        expect(
-            findAllByType(renderer, host.rect).map(
-                (rect) => rect.props.width,
-            ),
-        ).toEqual([60, 60]);
     });
 
     test("lets direct touch feedback props override the config", async () => {
@@ -487,23 +494,10 @@ describe("PROPS.md component contract", () => {
             />,
         );
 
-        expect(
-            findAllByType(renderer, host.radialGradient).map(
-                (gradient) => gradient.props.r,
-            ),
-        ).toEqual([5, 5]);
-        expect(
-            findAllByType(renderer, host.stop).map((stop) => ({
-                color: stop.props.stopColor,
-                opacity: stop.props.stopOpacity,
-            })),
-        ).toEqual([
-            { color: "#123456", opacity: 1 },
-            { color: "#123456", opacity: 0.25 },
-            { color: "#123456", opacity: 0 },
-            { color: "#123456", opacity: 1 },
-            { color: "#123456", opacity: 0.25 },
-            { color: "#123456", opacity: 0 },
+        // radius 10 * scale 0.5 = 5, and the opacity is clamped to 1.
+        expect(touchFeedbackBoxes(renderer)).toEqual([
+            { size: 10, gradient: gradientFor("#123456", 1, 0.25) },
+            { size: 10, gradient: gradientFor("#123456", 1, 0.25) },
         ]);
     });
 });

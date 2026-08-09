@@ -92,7 +92,6 @@ export const PillLayer = ({
                     <TouchFeedback
                         {...touchFeedback}
                         animatedStyle={touchFeedbackStyle}
-                        gradientId="selected-tab-touch-feedback"
                         offsetX={maskOverscanX}
                         offsetY={maskOverscanY}
                     />
