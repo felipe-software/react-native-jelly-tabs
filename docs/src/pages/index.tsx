@@ -13,8 +13,7 @@ function Hero() {
                 <p className={styles.eyebrow}>react-native-jelly-tabs</p>
                 <h1 className={styles.title}>{siteConfig.tagline}</h1>
                 <p className={styles.subtitle}>
-                    A gooey, gesture-driven tab bar. Drop-in for Expo Router and
-                    React Navigation — or headless for your own layout.
+                   Drop-in for Expo Router and React Navigation, or headless for your own layout.
                 </p>
                 <div className={styles.cta}>
                     <Link className="button button--primary button--lg" to="/docs/intro">

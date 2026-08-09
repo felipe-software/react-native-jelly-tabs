@@ -1,4 +1,5 @@
 .wrap {
+    width: 100%;
     margin: 1.4rem 0;
     border: 1px solid var(--ifm-toc-border-color);
     border-radius: 14px;

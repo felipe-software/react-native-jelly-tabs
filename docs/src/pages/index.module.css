@@ -49,6 +49,10 @@
 }
 
 .main {
+    /* The layout wrapper is a column flexbox, and the auto side margins below
+       cancel its stretch — without an explicit width this shrinks to the
+       iframe's 300px intrinsic default. */
+    width: 100%;
     max-width: 820px;
     margin: 0 auto;
     padding: 0 1rem 4rem;
