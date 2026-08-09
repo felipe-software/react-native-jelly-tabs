@@ -44,7 +44,7 @@ export default function Home() {
             <Hero />
             <main className={styles.main}>
                 <StorybookPreview
-                    id="getting-started-playground--default"
+                    id="getting-started-playground--homepage"
                     height={420}
                 />
             </main>

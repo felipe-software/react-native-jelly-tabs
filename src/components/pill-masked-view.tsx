@@ -95,11 +95,15 @@ export const PillMaskedView = ({
     );
 };
 
-// Promote the clip box to its own compositing layer so Safari clips the
-// composited (transform/opacity-animated) touch-feedback glow to the box's
-// rounded corners instead of letting it escape into a square corner for a
-// frame.
-const WEB_CLIP_LAYER = { willChange: "transform" } as unknown as ViewStyle;
+// Promote the clip box to its own compositing layer. The static clip-path is a
+// second paint boundary for Chromium, where a backdrop-filter child can escape
+// borderRadius + overflow:hidden while its transformed parent initializes and
+// briefly show a square blur halo. Only the box transform is animated; the clip
+// itself remains stable, avoiding Safari's animated clip-path rounding issue.
+const WEB_CLIP_LAYER = {
+    clipPath: "inset(0 round 999px)",
+    willChange: "transform",
+} as unknown as ViewStyle;
 
 const styles = StyleSheet.create({
     webClipBox: {

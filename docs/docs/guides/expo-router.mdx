@@ -11,12 +11,53 @@ title: Expo Router
 import { Tabs } from "expo-router";
 import { JellyTabBar } from "react-native-jelly-tabs";
 
+const badgeStyle = { backgroundColor: "#EF4444", color: "#FFFFFF" };
+const activeBadgeStyle = { backgroundColor: "#451A03", color: "#F59E0B" };
+
 export default function TabLayout() {
-    return <Tabs tabBar={(props) => <JellyTabBar {...props} floating />} />;
+    return (
+        <Tabs tabBar={(props) => <JellyTabBar {...props} floating />}>
+            <Tabs.Screen
+                name="index"
+                options={{
+                    title: "Home",
+                    tabBarBadge: 3,
+                    tabBarBadgeStyle: badgeStyle,
+                    tabBarActiveBadgeStyle: activeBadgeStyle,
+                    tabBarIcon: ({ color, size }) => (
+                        <HomeIcon color={color} size={size} />
+                    ),
+                }}
+            />
+            <Tabs.Screen
+                name="profile"
+                options={{
+                    title: "Profile",
+                    tabBarBadge: "9+",
+                    tabBarBadgeStyle: badgeStyle,
+                    tabBarActiveBadgeStyle: activeBadgeStyle,
+                    tabBarIcon: ({ color, size }) => (
+                        <ProfileIcon color={color} size={size} />
+                    ),
+                }}
+            />
+        </Tabs>
+    );
 }
 ```
 
-<StorybookPreview id="getting-started-playground--default" height={360} />
+<StorybookPreview
+    id="customization-items--badge-inside-and-outside-the-mask"
+    height={360}
+/>
+
+`tabBarBadgeStyle` controls the badge on the track, while
+`tabBarActiveBadgeStyle` overrides it inside the selected pill. The two colors
+swap continuously as the pill wipes across the badge.
+
+Expo Router supplies `state`, `descriptors`, `navigation` and `insets` — don't
+pass them manually. Selection stays in sync with deep links, hardware back and
+programmatic navigation.
 
 ## Floating
 
@@ -49,6 +90,11 @@ Jelly Tabs reads the standard tab options:
     options={{
         title: "Inbox",
         tabBarBadge: 3,
+        tabBarBadgeStyle: { backgroundColor: "#EF4444", color: "#FFFFFF" },
+        tabBarActiveBadgeStyle: {
+            backgroundColor: "#451A03",
+            color: "#F59E0B",
+        },
         tabBarIcon: ({ color, size }) => <InboxIcon color={color} size={size} />,
     }}
 />
@@ -59,6 +105,25 @@ Supported: `title`, string `tabBarLabel`, `tabBarLabelStyle`, `tabBarIcon`,
 `tabBarAccessibilityLabel`, `tabBarButtonTestID`, active/inactive tint & background
 colors, `tabBarBackground`, `tabBarStyle`, plus `tabPress` and `tabLongPress`
 events. See **[Items & badges](../customization/items)**.
+
+## Common overrides
+
+```tsx
+<Tabs
+    tabBar={(props) => (
+        <JellyTabBar
+            {...props}
+            floating
+            maxWidth={360}
+            colors={{ selectedSurface: "#2563EB", surface: "#18181B" }}
+        />
+    )}
+/>
+```
+
+Every visual prop from the [headless component](./headless) — `colors`,
+`opacity`, `config`, `backdrop`, touch feedback — is accepted here too. See
+**[Theming](../customization/theming)**.
 
 :::note
 Function-valued `tabBarLabel` and custom tab buttons are not rendered by the Jelly

@@ -237,6 +237,7 @@ export const JellyPreview = ({
                         colors={resolvedColors}
                         config={config}
                         items={resolvedItems}
+                        maxWidth={maxWidth}
                         opacity={opacity}
                         selectedIndex={selectedIndex ?? undefined}
                         selectedBackdrop={

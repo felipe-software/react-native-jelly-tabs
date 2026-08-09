@@ -8,13 +8,13 @@ A minimal Expo app with three pages (`Home`, `Search`, `Profile`) driven by **Ex
 
 ```tsx
 <Tabs tabBar={(props) => <JellyTabBar {...props} floating />}>
-  <Tabs.Screen name="index" />
-  <Tabs.Screen name="search" />
-  <Tabs.Screen name="profile" />
+  <Tabs.Screen name="index" options={{ title: "Home" }} />
+  <Tabs.Screen name="search" options={{ title: "Search", tabBarBadge: 3 }} />
+  <Tabs.Screen name="profile" options={{ title: "Profile", tabBarBadge: "9+" }} />
 </Tabs>
 ```
 
-`JellyTabBar` reads the routes, labels, icons and selected index directly from Expo Router's tab state. There is no duplicated item array or manual `navigation.navigate()` bridge, and route changes from deep links, hardware back or imperative navigation keep the pill synchronized.
+`JellyTabBar` reads the routes, labels, icons, badges and selected index directly from Expo Router's tab state. Badges use Expo Router's standard `tabBarBadge` and `tabBarBadgeStyle` screen options. There is no duplicated item array or manual `navigation.navigate()` bridge, and route changes from deep links, hardware back or imperative navigation keep the pill synchronized.
 
 This example enables `floating`, so the screens fill behind the absolutely positioned bar. The bar itself is centered with the library's default `maxWidth` of `400`.
 

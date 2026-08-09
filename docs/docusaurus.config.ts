@@ -8,9 +8,7 @@ const config: Config = {
     title: "Jelly Tabs",
     tagline: "A playful, jelly-like animated tab bar for React Native",
     favicon: "img/favicon.svg",
-
-    // Update `url` to the final host when the site is deployed (Cloudflare).
-    url: "https://react-native-jelly-tabs.pages.dev",
+    url: "https://jelly-docs.felipe.software",
     baseUrl: "/",
 
     organizationName: "felipe-software",

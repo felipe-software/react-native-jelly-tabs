@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { JellyPreview } from "../preview/JellyPreview";
+import { PALETTES } from "../preview/presets";
 
 const meta = {
     title: "Customization/Items",
@@ -19,13 +20,16 @@ type Story = StoryObj<typeof meta>;
  * `badge` takes a number or a string, so a count, an overflow marker (`9+`) and
  * a bare dot all work. Badges ride along with the icon and follow the pill.
  */
-export const Badges: Story = { args: { showBadges: true } };
+export const Badges: Story = {
+    args: { colors: PALETTES.Indigo, showBadges: true },
+};
 
 /** Restyle every badge at once with `badgeStyle`. */
 export const BadgeStyle: Story = {
     args: {
+        colors: PALETTES.Emerald,
         showBadges: true,
-        badgeStyle: { backgroundColor: "#38BDF8", color: "#082F49" },
+        badgeStyle: { backgroundColor: "#FDE047", color: "#422006" },
     },
 };
 

@@ -15,7 +15,6 @@ title: Layout
 ```
 
 <StorybookPreview id="customization-layout--tall" height={380} />
-<StorybookPreview id="customization-layout--compact" height={320} />
 
 | Key | Default | Description |
 | --- | --- | --- |
@@ -29,15 +28,41 @@ title: Layout
 The overscan values give the pill room to stretch past the track while it snaps.
 Raise them if a heavily inflated pill (`pillJelly.pressedScale`) looks clipped.
 
+## Icons only
+
+Navigation adapters honor `tabBarShowLabel: false`. With the headless component,
+use an empty visual label and keep `accessibilityLabel` populated.
+
+```tsx
+const iconOnlyItems = items.map((item) => ({
+    ...item,
+    accessibilityLabel: item.label,
+    label: "",
+}));
+
+<JellyTabBarHeadless items={iconOnlyItems} />
+```
+
+<StorybookPreview id="customization-layout--icon-only" height={320} />
+
 ## Width
 
 The bar centers inside wider parents and defaults to `maxWidth={400}`.
 
 ```tsx
-<JellyTabBar {...props} maxWidth={520} />
+<JellyTabBar
+    {...props}
+    maxWidth={960}
+    colors={{
+        activeContent: "#F5F3FF",
+        inactiveContent: "#A1A1AA",
+        selectedSurface: "#7C3AED",
+        surface: "#18181B",
+    }}
+/>
 ```
 
-<StorybookPreview id="customization-layout--full-width" height={340} />
+<StorybookPreview id="customization-layout--full-width" height={360} />
 
 ## Scaling everything at once
 

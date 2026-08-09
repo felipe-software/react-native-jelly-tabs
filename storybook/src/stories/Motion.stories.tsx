@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { JellyPreview } from "../preview/JellyPreview";
+import { PALETTES } from "../preview/presets";
 
 const meta = {
     title: "Customization/Motion",
@@ -22,11 +23,12 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /** The defaults. Press, drag sideways, then drag down to feel each group. */
-export const Default: Story = {};
+export const Default: Story = { args: { colors: PALETTES.Blue } };
 
 /** Looser springs and a bigger press inflation — more wobble on every snap. */
 export const Wobbly: Story = {
     args: {
+        colors: PALETTES.Pink,
         config: {
             pillJelly: {
                 pressedScale: 1.6,
@@ -44,6 +46,7 @@ export const Wobbly: Story = {
 /** Critically damped springs and no press inflation — a crisp, flat snap. */
 export const Snappy: Story = {
     args: {
+        colors: PALETTES.Cyan,
         config: {
             pillJelly: {
                 pressedScale: 1,
@@ -66,6 +69,7 @@ export const Snappy: Story = {
  */
 export const HeavyDrag: Story = {
     args: {
+        colors: PALETTES.Emerald,
         config: {
             distortion: {
                 verticalDrag: {
@@ -84,6 +88,7 @@ export const HeavyDrag: Story = {
  */
 export const TouchFeedback: Story = {
     args: {
+        colors: PALETTES.Violet,
         touchFeedbackEnabled: true,
         touchFeedbackColor: "#38BDF8",
         touchFeedbackOpacity: 0.45,
@@ -93,5 +98,5 @@ export const TouchFeedback: Story = {
 
 /** Opt out of the gradient entirely. */
 export const NoTouchFeedback: Story = {
-    args: { touchFeedbackEnabled: false },
+    args: { colors: PALETTES.Mono, touchFeedbackEnabled: false },
 };

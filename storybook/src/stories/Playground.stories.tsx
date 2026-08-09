@@ -22,3 +22,14 @@ type Story = StoryObj<typeof meta>;
  * Hit **Copy props** on the preview to take the current state into your code.
  */
 export const Default: Story = {};
+
+/** Homepage showcase: sample badges invert as the selected pill crosses them. */
+export const Homepage: Story = {
+    args: {
+        palette: "Amber",
+        showBadges: true,
+        badgeBackground: "#EF4444",
+        activeBadgeBackground: "#451A03",
+        activeBadgeColor: "#F59E0B",
+    },
+};
