@@ -1,0 +1,135 @@
+---
+sidebar_position: 2
+title: Hooks
+---
+
+# Gelatin hooks
+
+`JellyPressable` is a thin component over two hooks. Reach for them when you
+want the gelatin feel on something the library does not ship — a card, a
+draggable sheet, a custom gesture composition.
+
+## `useGelatin`
+
+```ts
+const gelatin = useGelatin(config: GelatinConfig, touchFeedbackRadius?: number);
+```
+
+Owns the whole deformation: the press inflation, the elastic offset, the
+per-axis stretch and the glow. It expects a resolved config, so pass
+`resolveGelatinConfig(partial?)` rather than a partial.
+
+| Returns | Type | Description |
+| --- | --- | --- |
+| `gelatinStyle` | animated style | Spread on the view you want to deform. Builds its pivot from paired translations, since Reanimated Web will not commit an animated `transformOrigin`. |
+| `touchFeedbackStyle` | animated style | Positions the glow. Feed it to `<TouchFeedback />`. |
+| `setSize(width, height)` | `(w, h) => void` | Call from `onLayout`; used to keep the glow inside the view. |
+| `begin(localX, localY)` | worklet | Pointer down, at view-local coordinates. |
+| `update(translationX, translationY, localX, localY)` | worklet | One drag sample. |
+| `end()` | worklet | Pointer up — bounce back and fade the glow out. |
+
+```tsx
+import {
+    JellyPressable,
+    TouchFeedback,
+    resolveGelatinConfig,
+    useGelatin,
+} from "react-native-jelly-tabs";
+
+const GelatinCard = ({ children }) => {
+    const config = useMemo(() => resolveGelatinConfig(), []);
+    const gelatin = useGelatin(config, config.touchFeedback.radius);
+
+    const gesture = Gesture.Pan()
+        .minDistance(0)
+        .onTouchesDown((event) => {
+            const touch = event.changedTouches[0];
+            gelatin.begin(touch.x, touch.y);
+        })
+        .onUpdate((event) => {
+            gelatin.update(
+                event.translationX,
+                event.translationY,
+                event.x,
+                event.y,
+            );
+        })
+        .onFinalize(() => gelatin.end());
+
+    return (
+        <GestureDetector gesture={gesture}>
+            <Animated.View
+                style={[styles.card, gelatin.gelatinStyle]}
+                onLayout={(e) =>
+                    gelatin.setSize(
+                        e.nativeEvent.layout.width,
+                        e.nativeEvent.layout.height,
+                    )
+                }
+            >
+                {children}
+            </Animated.View>
+        </GestureDetector>
+    );
+};
+```
+
+:::caution
+`event.x` / `event.y` are reliable on native. On web, Gesture Handler can report
+them relative to its own wrapper element — `JellyPressable` works around that by
+measuring the view's window position and deriving the local coordinate from
+`event.absoluteX`. Do the same if your surface has to work on the web.
+:::
+
+## `useTouchGlow`
+
+```ts
+const glow = useTouchGlow(spring: WithSpringConfig, radius?: number);
+```
+
+Just the highlight, without any deformation. This is the piece `useGelatin` and
+the tab bar's own `useDistortion` both build on.
+
+| Returns | Type | Description |
+| --- | --- | --- |
+| `centerX` / `centerY` | shared values | Where the glow sits, in view-local coordinates. Writable. |
+| `opacity` | shared value | `0` when hidden, springs to `1` on `show`. |
+| `show(x, y)` | worklet | Park the glow and fade it in. |
+| `hide()` | worklet | Fade it out, leaving the center where it was. |
+| `getStyle()` | worklet | Build the animated style. Wrap it yourself in `useAnimatedStyle`. |
+
+`getStyle` is deliberately *not* wrapped: a single animated style object cannot
+drive two views, and the tab bar paints the same glow twice — once under the
+track, once inside the pill mask.
+
+```tsx
+const glow = useTouchGlow({ duration: 300, dampingRatio: 0.5 }, 90);
+const style = useAnimatedStyle(glow.getStyle);
+```
+
+The center is exposed as shared values rather than hidden behind a setter so a
+caller can reuse it as a transform pivot — that is exactly how the tab bar
+distorts around the point you touched.
+
+## Pure math
+
+The deformation itself is three exported worklets, free of any React or
+Reanimated state, so they are easy to test or reuse:
+
+```ts
+applyElasticEasing(distance: number, exponent: number): number;
+getStretchFactor(easedDistance: number, config: GelatinDragConfig): number;
+getStretchOrigin(distance: number, config: GelatinDragConfig): number;
+getGelatinTransform(
+    translationX: number,
+    translationY: number,
+    config: GelatinDragConfig,
+): {
+    offsetX: number;
+    offsetY: number;
+    originX: number;
+    originY: number;
+    scaleX: number;
+    scaleY: number;
+};
+```

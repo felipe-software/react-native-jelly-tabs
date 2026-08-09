@@ -1,3 +1,4 @@
+import type { GelatinDragConfig } from "./utils/gelatin-animation";
 import type { PillJellyFrameConfig } from "./utils/pill-jelly-animation";
 
 export interface TabBarLayoutConfig {
@@ -69,14 +70,21 @@ export const PILL_JELLY = {
     },
 } as const satisfies PillJellyConfig;
 
+/** The radial highlight that fades in under the pointer. */
+export interface TouchFeedbackConfig {
+    /** Opacity at 45% of the radius, as a fraction of `opacity`. */
+    middleOpacityRatio: number;
+    /** Opacity at the very center of the gradient. */
+    opacity: number;
+    /** Gradient radius in px, before `scale`. */
+    radius: number;
+    /** Multiplier applied to `radius`. */
+    scale: number;
+}
+
 export interface DistortionConfig {
     pressedScale: number;
-    touchFeedback: {
-        middleOpacityRatio: number;
-        opacity: number;
-        radius: number;
-        scale: number;
-    };
+    touchFeedback: TouchFeedbackConfig;
     spring: {
         damping: number;
         mass: number;
@@ -113,6 +121,92 @@ export const DISTORTION = {
         rubberBand: 0.28 / 2,
     },
 } as const satisfies DistortionConfig;
+
+/**
+ * A duration-based spring, matching SwiftUI's `.smooth(duration:extraBounce:)`
+ * that the original Gelatin package animates with. `dampingRatio: 1` settles
+ * without overshoot; lower values add the bounce.
+ */
+export interface GelatinSpringConfig {
+    dampingRatio: number;
+    /** Milliseconds. */
+    duration: number;
+}
+
+/**
+ * Standalone elastic press/drag effect — used by `JellyPressable` and
+ * `useGelatin`. Deliberately independent of `TabBarConfig`: the pressable and
+ * the tab bar share hooks, not configuration.
+ */
+export interface GelatinConfig {
+    /** Scale applied to the whole view while it is pressed. */
+    pressedScale: number;
+    drag: GelatinDragConfig;
+    springs: {
+        /** Follows the finger during the drag. */
+        drag: GelatinSpringConfig;
+        /** Drives the press inflation and the glow fade. */
+        press: GelatinSpringConfig;
+        /** Bounces everything back once the finger lifts. */
+        release: GelatinSpringConfig;
+    };
+    touchFeedback: TouchFeedbackConfig;
+}
+
+export const GELATIN = {
+    pressedScale: 1.1,
+    drag: {
+        // Gelatin's own 80 is tuned for a full-screen card; a button is much
+        // smaller, so the same drag has to deform it a lot harder to read.
+        distanceForMaxStretch: 32,
+        easingExponent: 1 / 3,
+        follow: 2,
+        maxStretch: 0.9,
+        stretchAnchor: 1,
+        stretchAmplification: 3,
+    },
+    springs: {
+        drag: { dampingRatio: 1, duration: 390 },
+        press: { dampingRatio: 0.5, duration: 300 },
+        release: { dampingRatio: 0.5, duration: 500 },
+    },
+    touchFeedback: {
+        middleOpacityRatio: 0.43,
+        opacity: 0.35,
+        radius: 90,
+        scale: 1,
+    },
+} as const satisfies GelatinConfig;
+
+export const DEFAULT_GELATIN_CONFIG: GelatinConfig = GELATIN;
+
+export const resolveGelatinConfig = (
+    config?: DeepPartial<GelatinConfig>,
+): GelatinConfig => ({
+    pressedScale: config?.pressedScale ?? GELATIN.pressedScale,
+    drag: {
+        ...GELATIN.drag,
+        ...config?.drag,
+    },
+    springs: {
+        drag: {
+            ...GELATIN.springs.drag,
+            ...config?.springs?.drag,
+        },
+        press: {
+            ...GELATIN.springs.press,
+            ...config?.springs?.press,
+        },
+        release: {
+            ...GELATIN.springs.release,
+            ...config?.springs?.release,
+        },
+    },
+    touchFeedback: {
+        ...GELATIN.touchFeedback,
+        ...config?.touchFeedback,
+    },
+});
 
 export interface TabBarConfig {
     distortion: DistortionConfig;

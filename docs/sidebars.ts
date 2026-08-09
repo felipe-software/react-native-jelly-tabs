@@ -28,6 +28,12 @@ const sidebars: SidebarsConfig = {
         },
         {
             type: "category",
+            label: "Gelatin",
+            collapsed: false,
+            items: ["gelatin/pressable", "gelatin/hooks"],
+        },
+        {
+            type: "category",
             label: "API",
             items: ["api/props"],
         },

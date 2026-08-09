@@ -24,6 +24,7 @@ Demo at: https://jelly.felipe.software/
 - Navigation badges, test IDs, accessibility labels, label styles and `tabLongPress` events.
 - Badges that can restyle themselves as the pill wipes over them (`activeBadgeStyle`).
 - Headless component for custom routers and fully controlled tab state.
+- Standalone `JellyPressable` — the same focus glow, press scale and stretchy drag on any button, with no tab bar attached.
 - Custom icons, colors, opacity, sizing, springs, distortion, backdrops and touch feedback.
 - Compatible with Reanimated 3–4 and Gesture Handler 2–3 within the supported React Native ranges below.
 - Written in TypeScript with bundled type declarations.
@@ -122,6 +123,24 @@ Each item takes an `activeIcon` and an `inactiveIcon` render function.
 `JellyTabBarHeadless` adds no safe-area inset of its own. Give it a wrapper whose height matches `config.layout.trackHeight` (default `64`) times `displayScale`. 
 
 Colors, opacity, layout, jelly springs, distortion, backdrops, badges and the touch-feedback gradient are all configurable.
+
+### Standalone gelatin buttons
+
+`JellyPressable` is the same feel without the tab bar: press scale, a radial focus glow that tracks your finger, and an elastic stretch while you drag.
+
+```tsx
+import { JellyPressable } from "react-native-jelly-tabs";
+
+<JellyPressable
+    accessibilityLabel="Send"
+    style={{ backgroundColor: "#F59E0B", borderRadius: 28, padding: 16 }}
+    onPress={send}
+>
+    <Text>Send</Text>
+</JellyPressable>;
+```
+
+The drag math is ported from [Gelatin](https://github.com/Polarizz/Gelatin) and rebuilt on Reanimated worklets. `useGelatin` and `useTouchGlow` expose the effect for custom surfaces. See **[the docs](https://jelly.felipe.software/docs/gelatin/pressable)**.
 
 ## Documentation
 

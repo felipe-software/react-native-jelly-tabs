@@ -3,6 +3,7 @@ import {
     THEME_OPACITY,
     type BlurConfig,
 } from "@/components/color-customizer";
+import { GelatinButtons } from "@/components/gelatin-buttons";
 import { BlurTargetView, BlurView } from "expo-blur";
 import { Image, type ImageSource } from "expo-image";
 import { NavigationBar } from "expo-navigation-bar";
@@ -187,6 +188,13 @@ export default function HomeScreen() {
                                 touchFeedbackColor={touchFeedbackColor}
                             />
                         </View>
+                    )}
+
+                    {!RECORDING_MODE && (
+                        <GelatinButtons
+                            colors={colors}
+                            touchFeedbackColor={touchFeedbackColor}
+                        />
                     )}
 
                     <View

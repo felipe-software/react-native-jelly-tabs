@@ -1,5 +1,6 @@
 import type { TabBarConfig } from "../constants";
 import { getPointerOrigin, rubberBand } from "../utils/animation";
+import { useTouchGlow } from "./use-touch-glow";
 import {
     cancelAnimation,
     clamp,
@@ -24,12 +25,16 @@ export const useDistortion = (
     const dragOriginY = useSharedValue(0);
     const scaleX = useSharedValue(1);
     const pressedScale = useSharedValue(1);
-    const touchFeedbackOpacity = useSharedValue(0);
+
+    // The glow center doubles as the horizontal pivot: the tabbar distorts
+    // around the exact point the highlight sits on. `centerY` is kept in
+    // tabbar-local coordinates so the parent transform moves and distorts the
+    // glow together with the surface.
+    const glow = useTouchGlow(distortion.spring, touchFeedbackRadius);
+    const transformOriginX = glow.centerX;
 
     const pointerInitialLocalX = useSharedValue(0);
     const pointerInitialAbsoluteX = useSharedValue(0);
-    const pointerLocalY = useSharedValue(trackHeight / 2);
-    const transformOriginX = useSharedValue(0);
 
     const begin = (localX: number, localY: number, absoluteX: number) => {
         "worklet";
@@ -37,7 +42,6 @@ export const useDistortion = (
         cancelAnimation(translateY);
         cancelAnimation(scaleX);
         cancelAnimation(pressedScale);
-        cancelAnimation(touchFeedbackOpacity);
 
         dragOriginY.value = translateY.value;
         pressedScale.value = withSpring(
@@ -46,11 +50,10 @@ export const useDistortion = (
         );
         pointerInitialLocalX.value = localX;
         pointerInitialAbsoluteX.value = absoluteX;
-        // Keep the glow in tabbar-local coordinates so the parent transform
-        // moves and distorts it together with the surface.
-        pointerLocalY.value = clamp(localY, 0, trackHeight);
-        transformOriginX.value = clamp(localX, 0, trackWidth.value);
-        touchFeedbackOpacity.value = withSpring(1, distortion.spring);
+        glow.show(
+            clamp(localX, 0, trackWidth.value),
+            clamp(localY, 0, trackHeight),
+        );
     };
 
     const update = (
@@ -95,7 +98,7 @@ export const useDistortion = (
             }
         });
         pressedScale.value = withSpring(1, distortion.spring);
-        touchFeedbackOpacity.value = withSpring(0, distortion.spring);
+        glow.hide();
     };
 
     const setTrackWidth = (width: number) => {
@@ -128,24 +131,10 @@ export const useDistortion = (
         transform: [{ scale: pressedScale.value }],
     }));
 
-    const getTouchFeedbackStyle = () => {
-        "worklet";
-
-        return {
-            opacity: touchFeedbackOpacity.value,
-            transform: [
-                {
-                    translateX: transformOriginX.value - touchFeedbackRadius,
-                },
-                {
-                    translateY: pointerLocalY.value - touchFeedbackRadius,
-                },
-            ],
-        };
-    };
-
-    const touchFeedbackStyle = useAnimatedStyle(getTouchFeedbackStyle);
-    const selectedTouchFeedbackStyle = useAnimatedStyle(getTouchFeedbackStyle);
+    // Two views paint the same glow — under the track and inside the pill — so
+    // each needs its own animated style object.
+    const touchFeedbackStyle = useAnimatedStyle(glow.getStyle);
+    const selectedTouchFeedbackStyle = useAnimatedStyle(glow.getStyle);
 
     return {
         begin,
