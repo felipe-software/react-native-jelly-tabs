@@ -128,6 +128,10 @@ export const JellyTabBar = ({
 
     return (
         <View
+            // The container is full width while the track is centered and capped
+            // at `maxWidth`, so without this the empty strip either side of the
+            // bar swallows touches meant for the content behind it.
+            pointerEvents="box-none"
             style={[
                 styles.container,
                 {
