@@ -10,14 +10,25 @@ import { StyleSheet } from "react-native";
 
 const EmptyIcon: TabsIcon = () => null;
 
-const resolveLabel = (routeName: string, options: JellyNavigationOptions) => {
-    if (options.tabBarShowLabel === false) {
-        return "";
-    }
+/**
+ * The tab's name, whether or not the label is drawn. Kept separate from
+ * `resolveLabel` so hiding the label cannot also remove the accessible name.
+ */
+const resolveAccessibleName = (
+    routeName: string,
+    options: JellyNavigationOptions,
+) => {
     if (typeof options.tabBarLabel === "string") {
         return options.tabBarLabel;
     }
     return options.title ?? routeName;
+};
+
+const resolveLabel = (routeName: string, options: JellyNavigationOptions) => {
+    if (options.tabBarShowLabel === false) {
+        return "";
+    }
+    return resolveAccessibleName(routeName, options);
 };
 
 type TabBarIconRenderer = NonNullable<JellyNavigationOptions["tabBarIcon"]>;
@@ -80,7 +91,9 @@ export const getNavigationItems = (
     visibleRoutes.map((route) => {
         const options = descriptors[route.key]?.options ?? {};
         return {
-            accessibilityLabel: options.tabBarAccessibilityLabel,
+            accessibilityLabel:
+                options.tabBarAccessibilityLabel ??
+                resolveAccessibleName(route.name, options),
             activeBadgeStyle: options.tabBarActiveBadgeStyle,
             activeIcon: resolveIcon(options, true),
             badge: options.tabBarBadge,

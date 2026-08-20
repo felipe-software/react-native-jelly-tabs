@@ -131,6 +131,31 @@ describe("React Navigation item mapping", () => {
         expect(items.map((item) => item.label)).toEqual(["", "search"]);
     });
 
+    test("keeps an accessible name when the label is hidden", () => {
+        const items = getNavigationItems(
+            [
+                { key: "titled", name: "settings" },
+                { key: "labelled", name: "search" },
+                { key: "bare", name: "profile" },
+            ],
+            {
+                titled: {
+                    options: { tabBarShowLabel: false, title: "Settings" },
+                },
+                labelled: {
+                    options: { tabBarShowLabel: false, tabBarLabel: "Search" },
+                },
+                bare: { options: { tabBarShowLabel: false } },
+            },
+        );
+
+        expect(items.map((item) => item.accessibilityLabel)).toEqual([
+            "Settings",
+            "Search",
+            "profile",
+        ]);
+    });
+
     test("adapts the focused flag expected by tabBarIcon", () => {
         const tabBarIcon = mock(() => null);
         const [item] = getNavigationItems(
