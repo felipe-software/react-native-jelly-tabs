@@ -65,8 +65,7 @@
         "react": ">=18.0.0",
         "react-native": ">=0.76.0",
         "react-native-gesture-handler": ">=2.25.0 <4.0.0",
-        "react-native-reanimated": ">=3.16.0 <5.0.0",
-        "react-native-svg": ">=15.0.0"
+        "react-native-reanimated": ">=3.16.0 <5.0.0"
     },
     "devDependencies": {
         "@semantic-release/commit-analyzer": "^13.0.1",
@@ -81,7 +80,6 @@
         "react-native": "0.86.2",
         "react-native-gesture-handler": "^3.1.0",
         "react-native-reanimated": "4.5.1",
-        "react-native-svg": "15.15.4",
         "react-native-web": "~0.21.0",
         "test-renderer": "1.2.0",
         "conventional-changelog-conventionalcommits": "^10.2.1",

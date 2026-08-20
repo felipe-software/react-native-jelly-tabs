@@ -92,9 +92,11 @@ export const JellyTabBarHeadless = ({
     const trackRef = useRef<View>(null);
     const [uncontrolledSelectedIndex, setUncontrolledSelectedIndex] =
         useState(0);
-    // Web only: the pill clip box is statically sized from the measured track
-    // width so its animation stays transform-only. Unused on native.
-    const [webTrackWidth, setWebTrackWidth] = useState(0);
+    // The pill's box (the clip box on web/Android, the mask element on iOS) is
+    // sized statically from the measured track so that its animation stays
+    // transform-only — a width inside an animated style costs a shadow-tree
+    // commit per frame. onLayout only fires when the track really resizes.
+    const [measuredTrackWidth, setMeasuredTrackWidth] = useState(0);
     const resolvedConfig = useMemo(() => resolveTabBarConfig(config), [config]);
     const resolvedColors = {
         ...DEFAULT_TAB_BAR_COLORS,
@@ -185,6 +187,7 @@ export const JellyTabBarHeadless = ({
         setTrackWidth,
         setWebTrackPageX,
         tabbarStyle,
+        tabbarTransformOrigin,
         touchFeedbackStyle,
     } = usePillJelly(
         tabCount,
@@ -234,12 +237,13 @@ export const JellyTabBarHeadless = ({
                     style={[
                         styles.track,
                         { height: geometry.trackHeight },
+                        tabbarTransformOrigin,
                         tabbarStyle,
                     ]}
                     onLayout={(event) => {
                         setTrackWidth(event.nativeEvent.layout.width);
+                        setMeasuredTrackWidth(event.nativeEvent.layout.width);
                         if (Platform.OS === "web") {
-                            setWebTrackWidth(event.nativeEvent.layout.width);
                             measureWebTrackPageX();
                         }
                     }}
@@ -289,7 +293,7 @@ export const JellyTabBarHeadless = ({
                             }
                             touchFeedbackStyle={selectedTouchFeedbackStyle}
                             visible={semanticSelectedIndex !== null}
-                            webTrackWidth={webTrackWidth}
+                            measuredTrackWidth={measuredTrackWidth}
                         />
                     </Animated.View>
 
