@@ -52,6 +52,9 @@ export const TabItem = ({
     const color = isActive ? activeColor : inactiveColor;
     const opacity = isActive ? activeOpacity : inactiveOpacity;
     const Icon = isActive ? activeIcon : inactiveIcon;
+    // `resolveLabel` returns "" for `tabBarShowLabel: false`, so an absent
+    // label reaches this component as an empty string rather than undefined.
+    const hasLabel = text !== "";
 
     return (
         <Animated.View
@@ -68,7 +71,9 @@ export const TabItem = ({
                     style={[
                         styles.icon,
                         {
-                            transform: [{ translateY: 2 * displayScale }],
+                            transform: [
+                                { translateY: hasLabel ? 2 * displayScale : 0 },
+                            ],
                         },
                     ]}
                 >
@@ -102,23 +107,25 @@ export const TabItem = ({
                         </Text>
                     )}
                 </View>
-                <Text
-                    ellipsizeMode="tail"
-                    numberOfLines={1}
-                    selectable={false}
-                    style={[
-                        styles.label,
-                        {
-                            color,
-                            fontSize: 13 * displayScale,
-                            fontWeight: isActive ? "700" : "400",
-                            paddingHorizontal: 4 * displayScale,
-                        },
-                        labelStyle,
-                    ]}
-                >
-                    {text}
-                </Text>
+                {hasLabel && (
+                    <Text
+                        ellipsizeMode="tail"
+                        numberOfLines={1}
+                        selectable={false}
+                        style={[
+                            styles.label,
+                            {
+                                color,
+                                fontSize: 13 * displayScale,
+                                fontWeight: isActive ? "700" : "400",
+                                paddingHorizontal: 4 * displayScale,
+                            },
+                            labelStyle,
+                        ]}
+                    >
+                        {text}
+                    </Text>
+                )}
             </View>
         </Animated.View>
     );
