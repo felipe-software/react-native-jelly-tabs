@@ -1,12 +1,8 @@
 import NativeMaskedView from "@react-native-masked-view/masked-view";
 import type { PropsWithChildren } from "react";
-import {
-    Platform,
-    type StyleProp,
-    StyleSheet,
-    type ViewStyle,
-} from "react-native";
+import { type StyleProp, StyleSheet, type ViewStyle } from "react-native";
 import Animated, { type AnimatedStyle } from "react-native-reanimated";
+import { isWeb, usesClipBox } from "../platform";
 
 export interface PillMaskedViewProps extends PropsWithChildren {
     animatedStyle: StyleProp<AnimatedStyle<ViewStyle>>;
@@ -20,14 +16,25 @@ export interface PillMaskedViewProps extends PropsWithChildren {
     top: number;
 }
 
+// `width` is a plain style rather than part of `animatedStyle`: it only changes
+// when the track is re-measured, and a layout prop inside an animated style
+// costs a shadow-tree commit per frame on Fabric.
 const PillMaskElement = ({
     animatedStyle,
     height,
     left,
+    tabWidth,
     top,
-}: Pick<PillMaskedViewProps, "animatedStyle" | "height" | "left" | "top">) => (
+}: Pick<
+    PillMaskedViewProps,
+    "animatedStyle" | "height" | "left" | "tabWidth" | "top"
+>) => (
     <Animated.View
-        style={[styles.mask, { height, left, top }, animatedStyle]}
+        style={[
+            styles.mask,
+            { height, left, top, width: tabWidth },
+            animatedStyle,
+        ]}
     />
 );
 
@@ -43,7 +50,7 @@ export const PillMaskedView = ({
     tabWidth,
     top,
 }: PillMaskedViewProps) => {
-    if (Platform.OS === "web") {
+    if (usesClipBox()) {
         // The clip box is a statically sized rounded rect moved and scaled
         // only by clipStyle's transform; contentStyle applies the inverse
         // transform so the children stay fixed to the track. Safari drops the
@@ -52,8 +59,8 @@ export const PillMaskedView = ({
         return (
             <Animated.View
                 style={[
-                    styles.webClipBox,
-                    WEB_CLIP_LAYER,
+                    styles.clipBox,
+                    isWeb() && WEB_CLIP_LAYER,
                     {
                         borderRadius: height / 2,
                         height,
@@ -66,7 +73,7 @@ export const PillMaskedView = ({
             >
                 <Animated.View
                     style={[
-                        styles.webContent,
+                        styles.clipContent,
                         { height: contentHeight, width: contentWidth },
                         contentStyle,
                     ]}
@@ -86,6 +93,7 @@ export const PillMaskedView = ({
                     animatedStyle={animatedStyle}
                     height={height}
                     left={left}
+                    tabWidth={tabWidth}
                     top={top}
                 />
             }
@@ -106,11 +114,11 @@ const WEB_CLIP_LAYER = {
 } as unknown as ViewStyle;
 
 const styles = StyleSheet.create({
-    webClipBox: {
+    clipBox: {
         position: "absolute",
         overflow: "hidden",
     },
-    webContent: {
+    clipContent: {
         position: "absolute",
         left: 0,
         top: 0,

@@ -49,9 +49,6 @@ const host = {
     icon: "Icon",
     maskedView: "MaskedView",
     navigationIcon: "NavigationIcon",
-    radialGradient: "RadialGradient",
-    rect: "Rect",
-    stop: "Stop",
     text: "Text",
     view: "View",
 };
@@ -270,7 +267,6 @@ describe("TouchFeedback", () => {
                 centerOpacity={0.4}
                 color="#00ff00"
                 diameter={120}
-                gradientId="touch-gradient"
                 middleOpacity={0.2}
                 offsetX={8}
                 offsetY={12}
@@ -283,27 +279,15 @@ describe("TouchFeedback", () => {
                 findByType(renderer, host.animatedView).props.style,
             ),
         ).toMatchObject({
+            experimental_backgroundImage:
+                "radial-gradient(circle closest-side at center, " +
+                "rgba(0, 255, 0, 0.4) 0%, " +
+                "rgba(0, 255, 0, 0.2) 45%, " +
+                "rgba(0, 255, 0, 0) 100%)",
             height: 120,
             left: 8,
             opacity: 0.5,
             top: 12,
-            width: 120,
-        });
-        expect(
-            findByType(renderer, host.radialGradient).props,
-        ).toMatchObject({
-            cx: 60,
-            cy: 60,
-            id: "touch-gradient",
-            r: 60,
-        });
-        expect(
-            findAllByType(renderer, host.stop)
-                .map((stop) => stop.props.stopOpacity),
-        ).toEqual([0.4, 0.2, 0]);
-        expect(findByType(renderer, host.rect).props).toMatchObject({
-            fill: "url(#touch-gradient)",
-            height: 120,
             width: 120,
         });
     });
@@ -517,7 +501,11 @@ describe("JellyTabBarHeadless", () => {
         );
 
         expect(
-            findAllByType(renderer, host.radialGradient),
+            findAllByType(renderer, host.animatedView).filter(
+                (node) =>
+                    flattenStyle(node.props.style)
+                        .experimental_backgroundImage !== undefined,
+            ),
         ).toHaveLength(0);
     });
 });

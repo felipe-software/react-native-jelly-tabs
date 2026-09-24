@@ -91,6 +91,12 @@ export const dimensions = {
 mockModule("react-native", () => ({
     Dimensions: dimensions,
     Platform: platform,
+    // Mirrors the real `processColor`: `#rrggbb` in, ARGB packed into a signed
+    // 32-bit int out. Only the hex form is needed by the suite.
+    processColor(color: string) {
+        const match = /^#([0-9a-f]{6})$/i.exec(color);
+        return match === null ? null : 0xff000000 | parseInt(match[1], 16);
+    },
     StyleSheet: {
         absoluteFill,
         create<T>(styles: T) {
@@ -158,10 +164,3 @@ mockModule("@react-native-masked-view/masked-view", () => ({
     default: "MaskedView",
 }));
 
-mockModule("react-native-svg", () => ({
-    default: "Svg",
-    Defs: "Defs",
-    RadialGradient: "RadialGradient",
-    Rect: "Rect",
-    Stop: "Stop",
-}));
