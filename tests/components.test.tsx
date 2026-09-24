@@ -83,6 +83,18 @@ const flattenStyle = (style: unknown): Record<string, unknown> => {
         : {};
 };
 
+/** The View wrapping the icon and its badge, by its own `styles.icon` rule. */
+const iconWrapper = (renderer: RenderResult) => {
+    const wrapper = findAllByType(renderer, host.view).find(
+        (node) => flattenStyle(node.props.style).position === "relative",
+    );
+    if (!wrapper) {
+        throw new Error("Expected an icon wrapper View");
+    }
+
+    return wrapper;
+};
+
 const accessibilityTabs = (renderer: RenderResult) =>
     renderer.getAllByRole("tab");
 
@@ -185,6 +197,42 @@ describe("TabItem", () => {
             fontSize: 26,
             fontWeight: "700",
             letterSpacing: 3,
+        });
+    });
+
+    test("omits the label and its nudge when there is no label text", async () => {
+        const renderer = await render(
+            <TabItem
+                activeIcon={ActiveIcon}
+                colors={colors}
+                displayScale={2}
+                inactiveIcon={InactiveIcon}
+                text=""
+            />,
+        );
+
+        // An empty `Text` keeps its line box, and `styles.content` centers
+        // icon and label together, so it lifts the icon above the item's
+        // center while the selected pill stays on the item and clips it.
+        expect(findAllByType(renderer, host.text)).toHaveLength(0);
+        expect(flattenStyle(iconWrapper(renderer).props.style)).toMatchObject({
+            transform: [{ translateY: 0 }],
+        });
+    });
+
+    test("keeps the icon nudge while a label is drawn", async () => {
+        const renderer = await render(
+            <TabItem
+                activeIcon={ActiveIcon}
+                colors={colors}
+                displayScale={2}
+                inactiveIcon={InactiveIcon}
+                text="Home"
+            />,
+        );
+
+        expect(flattenStyle(iconWrapper(renderer).props.style)).toMatchObject({
+            transform: [{ translateY: 4 }],
         });
     });
 
