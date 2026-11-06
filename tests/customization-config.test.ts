@@ -24,10 +24,12 @@ describe("PROPS.md defaults", () => {
             surface: 1,
         });
         expect(TABBAR_LAYOUT).toEqual({
+            iconLabelGap: 0,
             iconSize: 28,
             itemHeight: 56,
             maskOverscanX: 48,
             maskOverscanY: 16,
+            pillOverhang: 0,
             trackHeight: 64,
             trackInset: 4,
         });
@@ -131,5 +133,27 @@ describe("resolveTabBarConfig", () => {
         expect(TABBAR_LAYOUT.iconSize).toBe(28);
         expect(PILL_JELLY.frameConfig.springs.panel.stiffness).toBe(300);
         expect(DISTORTION.touchFeedback.radius).toBe(150);
+    });
+
+    test("uses the Android defaults on Android, under explicit overrides", () => {
+        const android = resolveTabBarConfig(undefined, "android");
+        expect(android.layout).toMatchObject({
+            iconLabelGap: 1,
+            pillOverhang: 8,
+        });
+        expect(android.pillJelly.pressedScale).toBe(1.2);
+        expect(android.distortion.pressedScale).toBe(1.1);
+
+        const overridden = resolveTabBarConfig(
+            { layout: { pillOverhang: 0 }, pillJelly: { pressedScale: 1.4 } },
+            "android",
+        );
+        expect(overridden.layout.pillOverhang).toBe(0);
+        expect(overridden.pillJelly.pressedScale).toBe(1.4);
+        expect(overridden.distortion.pressedScale).toBe(1.1);
+
+        expect(resolveTabBarConfig(undefined, "ios").layout.pillOverhang).toBe(
+            0,
+        );
     });
 });

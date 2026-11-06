@@ -88,9 +88,18 @@ export const dimensions = {
     },
 };
 
+export const processColor = (color: unknown) => {
+    if (typeof color !== "string") {
+        return color;
+    }
+    const hex = /^#([0-9a-f]{6})$/i.exec(color)?.[1];
+    return hex === undefined ? null : Number.parseInt(`ff${hex}`, 16) | 0;
+};
+
 mockModule("react-native", () => ({
     Dimensions: dimensions,
     Platform: platform,
+    processColor,
     StyleSheet: {
         absoluteFill,
         create<T>(styles: T) {
@@ -161,7 +170,26 @@ mockModule("@react-native-masked-view/masked-view", () => ({
 mockModule("react-native-svg", () => ({
     default: "Svg",
     Defs: "Defs",
+    Path: "Path",
     RadialGradient: "RadialGradient",
     Rect: "Rect",
     Stop: "Stop",
+}));
+
+export const nativeViewCalls = {
+    activate: mock((_index: number) => Promise.resolve()),
+    restore: mock((_index: number) => Promise.resolve()),
+};
+
+const MockNativeJellyTabBarView = forwardRef<
+    typeof nativeViewCalls,
+    Record<string, unknown>
+>((props, ref) => {
+    useImperativeHandle(ref, () => nativeViewCalls, []);
+
+    return createElement("NativeJellyTabBarView", props);
+});
+
+mockModule("expo", () => ({
+    requireNativeView: () => MockNativeJellyTabBarView,
 }));

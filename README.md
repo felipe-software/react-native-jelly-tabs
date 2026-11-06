@@ -4,7 +4,7 @@
 [![React Native >=0.76](https://img.shields.io/badge/React%20Native-%3E%3D0.76-61DAFB?style=flat-square&logo=react&logoColor=white)](https://reactnative.dev/) [![Reanimated 3–4](https://img.shields.io/badge/Reanimated-3%20%E2%80%93%204-8A2BE2?style=flat-square)](https://docs.swmansion.com/react-native-reanimated/docs/guides/compatibility/) [![Gesture Handler 2–3](https://img.shields.io/badge/Gesture%20Handler-2%20%E2%80%93%203-005BBB?style=flat-square)](https://docs.swmansion.com/react-native-gesture-handler/docs/fundamentals/installation/) [![Runs with Expo](https://img.shields.io/badge/Runs%20with%20Expo-4630EB?style=flat-square&logo=expo&logoColor=white)](https://expo.dev/) [![Expo Router](https://img.shields.io/badge/Expo%20Router-compatible-000020?style=flat-square&logo=expo&logoColor=white)](https://docs.expo.dev/router/introduction/)<br>
 [![Platforms: Android, iOS and Web](https://img.shields.io/badge/platforms-Android%20%7C%20iOS%20%7C%20Web-34A853?style=flat-square)](#features) 
 
-A jelly-like animated tab bar for React Native, built with Reanimated, Gesture Handler and Masked View
+A jelly-like animated tab bar for React Native. On Android it renders natively (Kotlin, through an Expo module); on iOS and the web it is built with Reanimated, Gesture Handler and Masked View.
 
 <video src="https://github.com/user-attachments/assets/51101532-fdac-44bb-9ad0-e75f9c3b0171" autoplay muted controls></video>
 
@@ -18,7 +18,8 @@ Docs at: https://jelly-docs.felipe.software
 
 - ⭐️ Runs on Android, iOS and React Native Web.
 - ⭐️ Drop-in integration with Expo Router and React Navigation bottom tabs.
-- ⭐️ Compatible with Expo and bare React Native projects.
+- ⭐️ Compatible with Expo and bare React Native projects (bare projects need Expo Modules).
+- ⭐️ Native Android renderer: the jelly springs, touch handling and drawing run in Kotlin, off the JavaScript and Reanimated pipelines.
 - Smooth jelly snapping, dragging and press interactions powered by Reanimated and Gesture Handler.
 - Navigation-aware selection that follows deep links, hardware back and programmatic navigation.
 - Expo Router hidden tabs through `href: null`, including hidden focused routes with no false selection.
@@ -26,7 +27,8 @@ Docs at: https://jelly-docs.felipe.software
 - Navigation badges, test IDs, accessibility labels, label styles and `tabLongPress` events.
 - Badges that can restyle themselves as the pill wipes over them (`activeBadgeStyle`).
 - Headless component for custom routers and fully controlled tab state.
-- Custom icons, colors, opacity, sizing, springs, distortion, backdrops and touch feedback.
+- Icons as React components, SVG paths (`pathIcon`) or icon-font glyphs (`glyphIcon`); paths and glyphs are drawn natively on Android.
+- Custom colors, opacity, sizing, springs, distortion, backdrops and touch feedback.
 - Compatible with Reanimated 3–4 and Gesture Handler 2–3 within the supported React Native ranges below.
 - Written in TypeScript with bundled type declarations.
 
@@ -49,6 +51,12 @@ npm install @react-native-masked-view/masked-view react-native-gesture-handler r
 ``` 
 
 
+Jelly Tabs ships native Android code as an Expo module, so the app needs the `expo` package. Expo apps already have it. Bare React Native apps add it once:
+
+```sh
+npx install-expo-modules@latest
+```
+
 Then rebuild the native app — `npx expo prebuild` on Expo, or `pod install` + a fresh build on bare React Native. Aside from that command, Expo and bare React Native are identical here.
 
 <details>
@@ -67,6 +75,7 @@ Jelly Tabs works across a couple of major versions of each native dependency, so
 | Package | Supported range |
 | --- | --- |
 | React Native | `>=0.76` |
+| Expo | `>=52` (tested with SDK 57) |
 | Gesture Handler | `>=2.25 <4` (Gesture Handler 3 needs React Native `>=0.82`) |
 | Reanimated | `>=3.16 <5` |
 
@@ -119,11 +128,41 @@ Use `JellyTabBarHeadless` when you want the animated component without any navig
 />
 ```
 
-Each item takes an `activeIcon` and an `inactiveIcon` render function. 
+Each item takes an `activeIcon` and an `inactiveIcon` (see [Icons](#icons)). 
 
 `JellyTabBarHeadless` adds no safe-area inset of its own. Give it a wrapper whose height matches `config.layout.trackHeight` (default `64`) times `displayScale`. 
 
 Colors, opacity, layout, jelly springs, distortion, backdrops, badges and the touch-feedback gradient are all configurable.
+
+## Icons
+
+An icon can be any React component that receives `{ color, size, focused }`, so `tabBarIcon` render functions and icon-library components keep working. On Android they are hosted inside the native bar as React views.
+
+For the lightest Android rendering, build icons with the two helpers. They return regular icon components (so they also work on iOS, on the web, and as `tabBarIcon`), and on Android they are drawn natively:
+
+```tsx
+import { glyphIcon, pathIcon } from "react-native-jelly-tabs";
+import { mdiHome, mdiHomeOutline } from "@mdi/js";
+import glyphMap from "@react-native-vector-icons/material-icons/glyphmaps/MaterialIcons.json";
+
+// SVG path data, 24×24 viewBox by default
+const HomeIcon = pathIcon(mdiHome, { inactivePath: mdiHomeOutline });
+
+// A glyph from an icon font that is already loaded in the app
+const SettingsIcon = glyphIcon("MaterialIcons", glyphMap.settings);
+
+<Tabs.Screen name="index" options={{ title: "Home", tabBarIcon: HomeIcon }} />;
+```
+
+`glyphIcon` takes the font family name the font is registered under on Android (the file name for fonts bundled in `assets/fonts`, or the name given to `expo-font`) and a glyph string or code point.
+
+## Upgrading from 0.x
+
+- Android now renders natively. Rebuild the app after upgrading, and add Expo Modules to bare React Native apps (see [Installation](#installation)).
+- Android has its own defaults: 11 pt labels (weights 600/500), a pill 8 pt wider than its tab so tabs sit closer, a 1 pt icon-label gap, and stronger presses (pill 1.2×, track 1.1×). Pass `config` or `labelStyle` to change them; `layout.iconLabelGap` and `layout.pillOverhang` are new.
+- `expo` is a new peer dependency.
+- Icon components receive a `focused` prop (`true` for the copy revealed through the selected pill).
+- On Android, `labelStyle` / `tabBarLabelStyle` apply `color`, `fontFamily`, `fontSize`, `fontStyle`, `fontWeight`, `letterSpacing` and `textTransform`; other text style keys are ignored there.
 
 ## Documentation
 
@@ -148,7 +187,7 @@ bun run docs:build      # full static build (previews + docs) → docs/build
 
 ## Development
 
-The reusable package lives in `src/`. The Expo playground, generated background, and color laboratory live in `example/`.
+The reusable package lives in `src/`, and the native Android renderer in `android/`. The Expo playground, generated background, and color laboratory live in `example/`. `bench/` holds the Android benchmark (see [`bench/README.md`](./bench/README.md)).
 
 ```sh
 bun install

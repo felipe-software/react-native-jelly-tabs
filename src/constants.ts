@@ -1,19 +1,24 @@
 import type { PillJellyFrameConfig } from "./utils/pill-jelly-animation";
+import { Platform } from "react-native";
 
 export interface TabBarLayoutConfig {
+    iconLabelGap: number;
     iconSize: number;
     itemHeight: number;
     maskOverscanX: number;
     maskOverscanY: number;
+    pillOverhang: number;
     trackHeight: number;
     trackInset: number;
 }
 
 export const TABBAR_LAYOUT = {
+    iconLabelGap: 0,
     iconSize: 28,
     itemHeight: 56,
     maskOverscanX: 48,
     maskOverscanY: 16,
+    pillOverhang: 0,
     trackHeight: 64,
     trackInset: 4,
 } as const satisfies TabBarLayoutConfig;
@@ -130,61 +135,79 @@ export const DEFAULT_TAB_BAR_CONFIG: TabBarConfig = {
     pillJelly: PILL_JELLY,
 };
 
-export const resolveTabBarConfig = (
+export const ANDROID_TAB_BAR_CONFIG = {
+    distortion: { pressedScale: 1.1 },
+    layout: { iconLabelGap: 1, pillOverhang: 8 },
+    pillJelly: { pressedScale: 1.2 },
+} as const satisfies DeepPartial<TabBarConfig>;
+
+const mergeTabBarConfig = (
+    base: TabBarConfig,
     config?: DeepPartial<TabBarConfig>,
 ): TabBarConfig => ({
     layout: {
-        ...TABBAR_LAYOUT,
+        ...base.layout,
         ...config?.layout,
     },
     pillJelly: {
-        ...PILL_JELLY,
+        ...base.pillJelly,
         ...config?.pillJelly,
         frameConfig: {
-            ...PILL_JELLY.frameConfig,
+            ...base.pillJelly.frameConfig,
             ...config?.pillJelly?.frameConfig,
             springs: {
                 panel: {
-                    ...PILL_JELLY.frameConfig.springs.panel,
+                    ...base.pillJelly.frameConfig.springs.panel,
                     ...config?.pillJelly?.frameConfig?.springs?.panel,
                 },
                 press: {
-                    ...PILL_JELLY.frameConfig.springs.press,
+                    ...base.pillJelly.frameConfig.springs.press,
                     ...config?.pillJelly?.frameConfig?.springs?.press,
                 },
                 scaleX: {
-                    ...PILL_JELLY.frameConfig.springs.scaleX,
+                    ...base.pillJelly.frameConfig.springs.scaleX,
                     ...config?.pillJelly?.frameConfig?.springs?.scaleX,
                 },
                 scaleY: {
-                    ...PILL_JELLY.frameConfig.springs.scaleY,
+                    ...base.pillJelly.frameConfig.springs.scaleY,
                     ...config?.pillJelly?.frameConfig?.springs?.scaleY,
                 },
                 value: {
-                    ...PILL_JELLY.frameConfig.springs.value,
+                    ...base.pillJelly.frameConfig.springs.value,
                     ...config?.pillJelly?.frameConfig?.springs?.value,
                 },
                 velocity: {
-                    ...PILL_JELLY.frameConfig.springs.velocity,
+                    ...base.pillJelly.frameConfig.springs.velocity,
                     ...config?.pillJelly?.frameConfig?.springs?.velocity,
                 },
             },
         },
     },
     distortion: {
-        ...DISTORTION,
+        ...base.distortion,
         ...config?.distortion,
         touchFeedback: {
-            ...DISTORTION.touchFeedback,
+            ...base.distortion.touchFeedback,
             ...config?.distortion?.touchFeedback,
         },
         spring: {
-            ...DISTORTION.spring,
+            ...base.distortion.spring,
             ...config?.distortion?.spring,
         },
         verticalDrag: {
-            ...DISTORTION.verticalDrag,
+            ...base.distortion.verticalDrag,
             ...config?.distortion?.verticalDrag,
         },
     },
 });
+
+export const resolveTabBarConfig = (
+    config?: DeepPartial<TabBarConfig>,
+    platform: string = Platform.OS,
+): TabBarConfig => {
+    const base =
+        platform === "android"
+            ? mergeTabBarConfig(DEFAULT_TAB_BAR_CONFIG, ANDROID_TAB_BAR_CONFIG)
+            : DEFAULT_TAB_BAR_CONFIG;
+    return mergeTabBarConfig(base, config);
+};

@@ -1,0 +1,4 @@
+{
+    "platforms": ["android"],
+    "android": { "modules": ["software.felipe.jellytabs.JellyTabsModule"] }
+}

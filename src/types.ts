@@ -15,6 +15,7 @@ import type {
 export interface TabsIconProps {
     color: string;
     colors: Readonly<TabBarColors>;
+    focused: boolean;
     opacity: number;
     size: number;
 }

@@ -38,7 +38,9 @@ yarn-error.*
 
 # generated native folders
 /ios
-/android
+/android/build
+/android/.gradle
+/android/.cxx
 /example/ios
 /example/android
 /example/.expo
@@ -58,3 +60,7 @@ yarn-error.*
 # Dev stuff, I don't want mp4 into the library :)
 /references
 .argent
+
+# Benchmark scratch
+/bench/.legacy
+/bench/out
