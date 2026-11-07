@@ -1,5 +1,9 @@
 import { TabBadge } from "./tab-badge";
-import { TABBAR_LAYOUT, type TabBarColors } from "../constants";
+import {
+    resolveLabelTypography,
+    TABBAR_LAYOUT,
+    type TabBarColors,
+} from "../constants";
 import type { TabsIcon } from "../types";
 import {
     type StyleProp,
@@ -56,6 +60,10 @@ export const TabItem = ({
     // `resolveLabel` returns "" for `tabBarShowLabel: false`, so an absent
     // label reaches this component as an empty string rather than undefined.
     const hasLabel = text !== "";
+    const typography = resolveLabelTypography();
+    const labelWeight = isActive
+        ? typography.activeWeight
+        : typography.inactiveWeight;
 
     return (
         <Animated.View
@@ -104,8 +112,10 @@ export const TabItem = ({
                             styles.label,
                             {
                                 color,
-                                fontSize: 13 * displayScale,
-                                fontWeight: isActive ? "700" : "400",
+                                fontSize: typography.fontSize * displayScale,
+                                fontWeight: String(
+                                    labelWeight,
+                                ) as TextStyle["fontWeight"],
                                 paddingHorizontal: 4 * displayScale,
                             },
                             labelStyle,

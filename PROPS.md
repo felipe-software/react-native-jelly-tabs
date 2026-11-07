@@ -104,10 +104,11 @@ web they render with `react-native-svg` and `Text`.
 
 ## Android
 
-Android uses a native renderer with the same props and its own defaults:
-labels are `11` with weights `600` (selected copy) and `500`, the icon sits `1` above
-its label, the pill overhangs its tab by `8`, and presses scale the pill `1.2×` and the
-track `1.1×`. `resolveTabBarConfig()` returns these values on Android. Notes:
+Android uses a native renderer with the same props and its own defaults: the icon sits
+`1` above its label, the pill overhangs its tab by `8`, and presses scale the pill `1.2×`
+and the track `1.1×`. `resolveTabBarConfig()` returns these values on Android. Labels
+are `11` with weights `600` (selected copy) and `500` on Android and the web; iOS keeps
+`13` with `700` and `400`. Notes:
 
 - React icons, badges, `backdrop` and `selectedBackdrop` are React views hosted inside
   the native layers; `pathIcon` and `glyphIcon` icons and the labels are drawn natively.

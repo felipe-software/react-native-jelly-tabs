@@ -159,7 +159,8 @@ const SettingsIcon = glyphIcon("MaterialIcons", glyphMap.settings);
 ## Upgrading from 0.x
 
 - Android now renders natively. Rebuild the app after upgrading, and add Expo Modules to bare React Native apps (see [Installation](#installation)).
-- Android has its own defaults: 11 pt labels (weights 600/500), a pill 8 pt wider than its tab so tabs sit closer, a 1 pt icon-label gap, and stronger presses (pill 1.2×, track 1.1×). Pass `config` or `labelStyle` to change them; `layout.iconLabelGap` and `layout.pillOverhang` are new.
+- Labels are now 11 pt (weights 600/500) on Android and the web; iOS keeps 13 pt (700/400). Override with `labelStyle`.
+- Android has its own layout defaults: a pill 8 pt wider than its tab so tabs sit closer, a 1 pt icon-label gap, and stronger presses (pill 1.2×, track 1.1×). Pass `config` to change them; `layout.iconLabelGap` and `layout.pillOverhang` are new.
 - `expo` is a new peer dependency.
 - Icon components receive a `focused` prop (`true` for the copy revealed through the selected pill).
 - On Android, `labelStyle` / `tabBarLabelStyle` apply `color`, `fontFamily`, `fontSize`, `fontStyle`, `fontWeight`, `letterSpacing` and `textTransform`; other text style keys are ignored there.

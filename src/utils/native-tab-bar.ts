@@ -1,4 +1,4 @@
-import type { TabBarConfig } from "../constants";
+import { COMPACT_LABEL_TYPOGRAPHY, type TabBarConfig } from "../constants";
 import { getIconSources } from "../icons";
 import type {
     NativeIcon,
@@ -9,9 +9,6 @@ import type {
 import type { TabsItem } from "../types";
 import { processColor, StyleSheet, type TextStyle } from "react-native";
 
-const LABEL_FONT_SIZE = 11;
-const ACTIVE_LABEL_WEIGHT = 600;
-const INACTIVE_LABEL_WEIGHT = 500;
 const PANEL_OFFSET = 4;
 const NAMED_FONT_WEIGHTS: Readonly<Record<string, number>> = {
     black: 900,
@@ -79,10 +76,12 @@ const resolveLabelStyle = (
     fontSize:
         typeof flatStyle.fontSize === "number"
             ? flatStyle.fontSize
-            : LABEL_FONT_SIZE * displayScale,
+            : COMPACT_LABEL_TYPOGRAPHY.fontSize * displayScale,
     fontWeight: resolveFontWeight(
         flatStyle.fontWeight,
-        isActive ? ACTIVE_LABEL_WEIGHT : INACTIVE_LABEL_WEIGHT,
+        isActive
+            ? COMPACT_LABEL_TYPOGRAPHY.activeWeight
+            : COMPACT_LABEL_TYPOGRAPHY.inactiveWeight,
     ),
     italic: flatStyle.fontStyle === "italic",
     letterSpacing:

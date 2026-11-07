@@ -141,6 +141,29 @@ export const ANDROID_TAB_BAR_CONFIG = {
     pillJelly: { pressedScale: 1.2 },
 } as const satisfies DeepPartial<TabBarConfig>;
 
+export interface TabLabelTypography {
+    fontSize: number;
+    activeWeight: number;
+    inactiveWeight: number;
+}
+
+export const DEFAULT_LABEL_TYPOGRAPHY = {
+    fontSize: 13,
+    activeWeight: 700,
+    inactiveWeight: 400,
+} as const satisfies TabLabelTypography;
+
+export const COMPACT_LABEL_TYPOGRAPHY = {
+    fontSize: 11,
+    activeWeight: 600,
+    inactiveWeight: 500,
+} as const satisfies TabLabelTypography;
+
+export const resolveLabelTypography = (
+    platform: string = Platform.OS,
+): TabLabelTypography =>
+    platform === "ios" ? DEFAULT_LABEL_TYPOGRAPHY : COMPACT_LABEL_TYPOGRAPHY;
+
 const mergeTabBarConfig = (
     base: TabBarConfig,
     config?: DeepPartial<TabBarConfig>,

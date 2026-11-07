@@ -5,6 +5,7 @@ import {
     DEFAULT_TAB_BAR_OPACITY,
     DISTORTION,
     PILL_JELLY,
+    resolveLabelTypography,
     resolveTabBarConfig,
     TABBAR_LAYOUT,
 } from "../src/constants";
@@ -155,5 +156,20 @@ describe("resolveTabBarConfig", () => {
         expect(resolveTabBarConfig(undefined, "ios").layout.pillOverhang).toBe(
             0,
         );
+    });
+
+    test("keeps iOS labels at 13 and uses 11 everywhere else", () => {
+        expect(resolveLabelTypography("ios")).toEqual({
+            fontSize: 13,
+            activeWeight: 700,
+            inactiveWeight: 400,
+        });
+        const compact = {
+            fontSize: 11,
+            activeWeight: 600,
+            inactiveWeight: 500,
+        };
+        expect(resolveLabelTypography("web")).toEqual(compact);
+        expect(resolveLabelTypography("android")).toEqual(compact);
     });
 });
