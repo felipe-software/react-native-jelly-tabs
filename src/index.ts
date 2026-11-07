@@ -1,6 +1,17 @@
 export { JellyTabBar } from "./components/navigation-tab-bar";
 export { JellyTabBarHeadless, JellyTabs } from "./components/tabs";
 export {
+    glyphIcon,
+    pathIcon,
+    type GlyphIconOptions,
+    type JellyGlyphIconSource,
+    type JellyIcon,
+    type JellyIconProps,
+    type JellyIconSource,
+    type JellyPathIconSource,
+    type PathIconOptions,
+} from "./icons";
+export {
     type JellyNavigationDescriptor,
     type JellyNavigationEvent,
     type JellyNavigationHelpers,

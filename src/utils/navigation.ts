@@ -6,6 +6,7 @@ import type {
     TabsIcon,
     TabsItem,
 } from "../types";
+import { withIconSources } from "../icons";
 import { StyleSheet } from "react-native";
 
 const EmptyIcon: TabsIcon = () => null;
@@ -49,11 +50,13 @@ const resolveIcon = (
 
     let wrappers = iconWrappers.get(renderIcon);
     if (!wrappers) {
+        const active: TabsIcon = ({ color, size }) =>
+            renderIcon({ color, focused: true, size });
+        const inactive: TabsIcon = ({ color, size }) =>
+            renderIcon({ color, focused: false, size });
         wrappers = {
-            active: ({ color, size }) =>
-                renderIcon({ color, focused: true, size }),
-            inactive: ({ color, size }) =>
-                renderIcon({ color, focused: false, size }),
+            active: withIconSources(active, renderIcon),
+            inactive: withIconSources(inactive, renderIcon),
         };
         iconWrappers.set(renderIcon, wrappers);
     }

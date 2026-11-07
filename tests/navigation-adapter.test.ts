@@ -179,6 +179,7 @@ describe("React Navigation item mapping", () => {
                 selectedSurface: "white",
                 surface: "black",
             },
+            focused: true,
             opacity: 1,
             size: 24,
         });
@@ -190,6 +191,7 @@ describe("React Navigation item mapping", () => {
                 selectedSurface: "white",
                 surface: "black",
             },
+            focused: false,
             opacity: 0.5,
             size: 20,
         });

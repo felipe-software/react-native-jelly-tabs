@@ -58,7 +58,7 @@ buttons are not rendered by the Jelly layout.
 interface TabsItem {
     key: string;
     label: string;
-    activeIcon: TabsIcon; // revealed through the pill mask
+    activeIcon: TabsIcon; // revealed through the pill mask; see pathIcon / glyphIcon
     inactiveIcon: TabsIcon; // drawn in the track
     accessibilityLabel?: string;
     labelStyle?: StyleProp<TextStyle>;
@@ -83,10 +83,39 @@ interface TabsChangeEvent {
 interface TabsIconProps {
     color: string; // resolved active/inactive content color
     colors: Readonly<TabBarColors>; // full palette
+    focused: boolean; // true for the copy revealed through the pill
     size: number; // resolved icon size
     opacity: number; // resolved layer opacity
 }
 ```
+
+## Icon helpers
+
+```ts
+pathIcon(path: string, options?: { inactivePath?: string; viewBox?: number }): JellyIcon
+glyphIcon(fontFamily: string, glyph: string | number, options?: { inactiveGlyph?: string | number }): JellyIcon
+```
+
+Both return an icon component usable as `activeIcon`, `inactiveIcon` or a navigator's
+`tabBarIcon`. `viewBox` is the side of the square path viewBox (default `24`). The
+inactive variant is used for the copy outside the pill, or when React Navigation
+passes `focused: false`. On Android these icons are drawn natively; on iOS and the
+web they render with `react-native-svg` and `Text`.
+
+## Android
+
+Android uses a native renderer with the same props and its own defaults: the icon sits
+`1` above its label, the pill overhangs its tab by `8`, and presses scale the pill `1.2×`
+and the track `1.1×`. `resolveTabBarConfig()` returns these values on Android. Labels
+are `11` with weights `600` (selected copy) and `500` on Android and the web; iOS keeps
+`13` with `700` and `400`. Notes:
+
+- React icons, badges, `backdrop` and `selectedBackdrop` are React views hosted inside
+  the native layers; `pathIcon` and `glyphIcon` icons and the labels are drawn natively.
+- `labelStyle` applies `color`, `fontFamily`, `fontSize`, `fontStyle`, `fontWeight`,
+  `letterSpacing` and `textTransform`; other text style keys are ignored.
+- `layout.maskOverscanX` / `maskOverscanY` size the `selectedBackdrop` overscan; there
+  is no mask view.
 
 ## `colors` / `opacity`
 
@@ -116,20 +145,22 @@ keeps a fully opaque clipping shape.
 
 ### `config.layout`
 
-| Key | Default | Description |
-| --- | --- | --- |
-| `iconSize` | `28` | Base icon size passed to each icon. |
-| `itemHeight` | `56` | Height of a single tab / the selected pill. |
-| `trackHeight` | `64` | Height of the track. |
-| `trackInset` | `4` | Padding between the track edge and items. |
-| `maskOverscanX` | `48` | Horizontal overscan for the pill mask. |
-| `maskOverscanY` | `16` | Vertical overscan for the pill mask. |
+| Key | Default | Android default | Description |
+| --- | --- | --- | --- |
+| `iconSize` | `28` | `28` | Base icon size passed to each icon. |
+| `itemHeight` | `56` | `56` | Height of a single tab / the selected pill. |
+| `trackHeight` | `64` | `64` | Height of the track. |
+| `trackInset` | `4` | `4` | Padding between the track edge and items. |
+| `maskOverscanX` | `48` | `48` | Horizontal overscan for the pill mask. |
+| `maskOverscanY` | `16` | `16` | Vertical overscan for the pill mask. |
+| `iconLabelGap` | `0` | `1` | Space between icon and label. Android only. |
+| `pillOverhang` | `0` | `8` | How much wider the pill (and each tab's content box) is than the tab pitch, so tabs sit closer. Android only. |
 
 ### `config.pillJelly`
 
 | Key | Default | Description |
 | --- | --- | --- |
-| `pressedScale` | `1.3` | How much the pill inflates while pressed. |
+| `pressedScale` | `1.3` (Android `1.2`) | How much the pill inflates while pressed. |
 | `snapOnPointerDown` | `true` | Snap the indicator toward the touch on press. |
 | `frameConfig.releaseDistanceFraction` | `0.025` | Keeps the indicator inflated until it is within this fraction of its snap point. |
 
@@ -148,7 +179,7 @@ Springs are `{ stiffness, dampingRatio }` per channel:
 
 | Key | Default | Description |
 | --- | --- | --- |
-| `pressedScale` | `1.025` | Whole-track scale while pressed. |
+| `pressedScale` | `1.025` (Android `1.1`) | Whole-track scale while pressed. |
 | `touchFeedback.opacity` | `0.15` | Base opacity of the radial gradient. |
 | `touchFeedback.middleOpacityRatio` | `0.43` | Opacity of the gradient's `45%` stop, relative to the base. |
 | `touchFeedback.radius` | `150` | Base gradient radius (px). |

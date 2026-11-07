@@ -1,4 +1,9 @@
-import { TABBAR_LAYOUT, type TabBarColors } from "../constants";
+import { TabBadge } from "./tab-badge";
+import {
+    resolveLabelTypography,
+    TABBAR_LAYOUT,
+    type TabBarColors,
+} from "../constants";
 import type { TabsIcon } from "../types";
 import {
     type StyleProp,
@@ -55,6 +60,10 @@ export const TabItem = ({
     // `resolveLabel` returns "" for `tabBarShowLabel: false`, so an absent
     // label reaches this component as an empty string rather than undefined.
     const hasLabel = text !== "";
+    const typography = resolveLabelTypography();
+    const labelWeight = isActive
+        ? typography.activeWeight
+        : typography.inactiveWeight;
 
     return (
         <Animated.View
@@ -80,31 +89,18 @@ export const TabItem = ({
                     <Icon
                         color={color}
                         colors={colors}
+                        focused={isActive}
                         opacity={opacity}
                         size={iconSize ?? TABBAR_LAYOUT.iconSize * displayScale}
                     />
                     {badge !== undefined && (
-                        <Text
-                            numberOfLines={1}
-                            selectable={false}
-                            style={[
-                                styles.badge,
-                                {
-                                    borderRadius: 8 * displayScale,
-                                    fontSize: 10 * displayScale,
-                                    height: 16 * displayScale,
-                                    lineHeight: 16 * displayScale,
-                                    minWidth: 16 * displayScale,
-                                    paddingHorizontal: 4 * displayScale,
-                                    right: -10 * displayScale,
-                                    top: -5 * displayScale,
-                                },
-                                badgeStyle,
-                                isActive && activeBadgeStyle,
-                            ]}
-                        >
-                            {badge}
-                        </Text>
+                        <TabBadge
+                            activeBadgeStyle={activeBadgeStyle}
+                            badge={badge}
+                            badgeStyle={badgeStyle}
+                            displayScale={displayScale}
+                            isActive={isActive}
+                        />
                     )}
                 </View>
                 {hasLabel && (
@@ -116,8 +112,10 @@ export const TabItem = ({
                             styles.label,
                             {
                                 color,
-                                fontSize: 13 * displayScale,
-                                fontWeight: isActive ? "700" : "400",
+                                fontSize: typography.fontSize * displayScale,
+                                fontWeight: String(
+                                    labelWeight,
+                                ) as TextStyle["fontWeight"],
                                 paddingHorizontal: 4 * displayScale,
                             },
                             labelStyle,
@@ -143,14 +141,6 @@ const styles = StyleSheet.create({
     },
     icon: {
         position: "relative",
-    },
-    badge: {
-        backgroundColor: "#FF3B30",
-        color: "#FFFFFF",
-        fontWeight: "700",
-        overflow: "hidden",
-        position: "absolute",
-        textAlign: "center",
     },
     label: {
         alignSelf: "stretch",

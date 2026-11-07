@@ -260,6 +260,36 @@ describe("TabItem", () => {
             fontWeight: "400",
         });
     });
+
+    test("uses the compact Android label typography on web", async () => {
+        platform.OS = "web";
+        const labelStyle = async (isActive: boolean) => {
+            const renderer = await render(
+                <TabItem
+                    activeIcon={ActiveIcon}
+                    colors={colors}
+                    displayScale={2}
+                    inactiveIcon={InactiveIcon}
+                    isActive={isActive}
+                    text="Home"
+                />,
+            );
+            const style = flattenStyle(
+                findAllByType(renderer, host.text)[0]?.props.style,
+            );
+            await cleanup();
+            return style;
+        };
+
+        expect(await labelStyle(true)).toMatchObject({
+            fontSize: 22,
+            fontWeight: "600",
+        });
+        expect(await labelStyle(false)).toMatchObject({
+            fontSize: 22,
+            fontWeight: "500",
+        });
+    });
 });
 
 describe("TouchFeedback", () => {
